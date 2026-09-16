@@ -80,6 +80,15 @@ def build_parser():
     run.add_argument('--dry-run', action='store_true')
     run.add_argument('--allow-ui', action='store_true')
     run.add_argument('--reconcile', action='store_true')
+    soak = commands.add_parser('soak', help='Explicit deadline-limited serial collection segment; no installed service or schedule')
+    soak.add_argument('--config', required=True, type=Path)
+    soak.add_argument('--until', required=True, help='Absolute authorization end, ISO time with timezone')
+    soak.add_argument('--duration-seconds', type=int, default=3300)
+    soak.add_argument('--interval', type=int, default=60)
+    soak.add_argument('--cycles', type=int)
+    soak.add_argument('--allow-ui', action='store_true')
+    soak.add_argument('--activate-clients', action='store_true', help='Explicitly switch between uniquely matched already-running IM windows before the deadline')
+    commands.add_parser('soak-status', help='Read latest bounded-run report without collecting or activating windows')
     commands.add_parser('verify', help='Verify stored messages, provenance and SQLite integrity without collecting')
     h = commands.add_parser('health', help='Inspect integrity, freshness and collection errors')
     h.add_argument('--config', type=Path)
@@ -127,6 +136,8 @@ def main(argv=None):
         if hasattr(stream, 'reconfigure'):
             stream.reconfigure(encoding='utf-8', errors='strict')
     try:
+        from .soak import parent_gate
+        parent_gate()
         a = build_parser().parse_args(argv)
         home = a.home.resolve()
         if a.command == 'init':
@@ -154,6 +165,12 @@ def main(argv=None):
         elif a.command == 'run':
             from .operations import run_cycles
             data = run_cycles(home, a.config, a.source, a.cycles, a.interval, a.dry_run, a.allow_ui, a.reconcile)
+        elif a.command == 'soak':
+            from .soak import run_soak
+            data = run_soak(home,a.config,a.until,a.interval,a.duration_seconds,a.allow_ui,a.activate_clients,a.cycles)
+        elif a.command == 'soak-status':
+            from .soak import soak_status
+            data = soak_status(home)
         elif a.command == 'verify':
             from .operations import verify
             data = verify(home)
@@ -176,7 +193,7 @@ def main(argv=None):
                     'llm_required': False, 'frontend': False, 'new_live_collection_implemented': True,
                     'live_database_platforms': ['kim', 'wechat'], 'plaintext_cache_platforms': ['wechat'],
                     'source_client_version_required': False, 'source_version_policy': 'capability_probe_not_version_whitelist',
-                    'automatic_ui': False, 'scheduler_enabled': False,
+                    'automatic_ui': True, 'automatic_ui_requires_calibrated_profile_and_explicit_consent': True, 'scheduler_enabled': False,
                     'send_supported': False, 'source_modes': ['KIM native SQLite', 'WeChat authenticated encrypted DB/WAL (existing keys only)', 'WeChat plaintext SQLite cache', 'normalized-v2 file', 'TIM TXT file', 'WeCom native payload/enriched JSON', 'QCE JSON file']}
         elif a.command in ('sources', 'status', 'coverage'):
             data = source_status(home, a.platform, a.stream, a.include_synthetic, a.max_age_seconds)
@@ -201,6 +218,8 @@ def main(argv=None):
         else:
             raise IMError('UNKNOWN_COMMAND')
         print(json.dumps({'ok': True, 'command': a.command, 'data': data}, ensure_ascii=False, allow_nan=False))
+        if a.command == 'soak':
+            return 0 if data['status']=='segment_complete' and not data['paused_sources'] and data.get('last_cycle_all_succeeded') else 4
         return 4 if a.command == 'run' and not data['success'] else 0
     except IMError as exc:
         print(json.dumps({'ok': False, 'error': {'code': exc.code}, 'source_refreshed': False}))

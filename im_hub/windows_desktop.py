@@ -179,6 +179,8 @@ class NativeWindows:
         return data.dwTime
 
     def guard(self):
+        from .desktop_runtime import check_policy
+        check_policy()
         if time.monotonic() > self.deadline: raise IMError('DESKTOP_RUN_TIME_LIMIT')
         if self.input_tick() != self.last_input: raise IMError('USER_INPUT_DETECTED_PAUSED')
         hwnd = self.user.GetForegroundWindow()

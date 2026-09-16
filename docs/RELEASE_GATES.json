@@ -1,18 +1,23 @@
 {
-  "version": "1.0.0rc3.dev1",
-  "delivery_kind": "installable_product_release_candidate",
+  "version": "1.0.0rc3",
+  "delivery_kind": "configured_four_platform_cli_release_candidate",
+  "configured_four_platform_automatic_collection_verified": true,
   "full_user_goal_accepted": false,
   "mandatory_llm": false,
   "frontend": false,
-  "core_implemented": ["profile_validation", "file_database_ingestion", "strict_TIM_prefix_reconciliation", "explicit_WeCom_copy_capture", "recoverable_import", "cross_platform_query", "complete_export", "evidence_report", "health_integrity", "backup_restore", "bounded_foreground_runs", "portable_selftest"],
+  "source_version_whitelist": false,
   "gates": [
-    {"id":"wechat_live_refresh","status":"native_read_verified","detail":"Current encrypted DB and committed WAL read with an existing key cache; 62 real records, three passes. New events during the observation interval not seen."},
-    {"id":"tim_ui_calibration","status":"bound_foreground_export_verified","detail":"Deterministic visual/native driver automatically exported 4657 real records and replayed with zero new records. Requires initially foregrounded TIM and private reviewed anchors; new-message delay not measured."},
-    {"id":"source_version_policy","status":"passed","version_required":false,"detail":"No source version whitelist; version and missing version are diagnostic only. Process, scope, controls and native payload capabilities remain checked."},
-    {"id":"wecom_ui_history","status":"blocked_during_live_acceptance","detail":"Bound work conversation and Copy/Multiselect menu observed. Platform safety check blocked clipboard baseline read; no alternate route or new native capture. Visual paging remains unimplemented/unverified, not version-gated."},
-    {"id":"cross_client_orchestration","status":"not_accepted","detail":"TIM visual driver requires the correct initial foreground client; fully automatic safe inter-client focus orchestration not implemented."},
-    {"id":"natural_new_event_latency","status":"not_measured","detail":"No per-platform naturally arriving new-event delay evidence in this acceptance. Existing records and replay are not new messages."},
-    {"id":"unattended_24_72h","status":"not_run","detail":"No schedule installed; bounded command tests do not prove unattended operation."},
-    {"id":"attachments_and_edits","status":"partial","detail":"Unknown types/attachment bodies are retained as gaps; edits/retractions conflict rather than silently overwriting."}
+    {"id":"wechat_current_source","status":"passed","detail":"Authenticated current encrypted DB and committed WAL using explicit existing keys; no key discovery/extraction."},
+    {"id":"kim_current_source","status":"passed","detail":"Exact reviewed account/group/session native SQLite reads and incremental checkpoints."},
+    {"id":"tim_automatic_export","status":"passed","detail":"Program navigated actual official TXT export, verified group and filename, imported 4657 records, and repeated with zero additions."},
+    {"id":"wecom_automatic_copy_and_paging","status":"passed_bounded_scope","detail":"Actual single-message native copies, three visible history pages, 8 distinct records, replay zero additions; latest-view reset verified. Not full server history."},
+    {"id":"cross_client_orchestration","status":"passed","detail":"Two serial four-source cycles, no manual foreground switching. Exact normal taskbar running-window buttons; no force-foreground settings or key tricks."},
+    {"id":"source_version_policy","status":"passed","detail":"Source version absent or changed does not block; actual identity/control/format checks remain."},
+    {"id":"store_integrity","status":"passed","records_at_initial_acceptance":4736,"detail":"Four streams verified; no pending batches at the initial acceptance checkpoint."},
+    {"id":"owned_process_stop","status":"passed_tests","detail":"Synthetic deadline/STOP/input tests and actual harmless child/grandchild kill-on-close ownership tests. No source IM process terminated."},
+    {"id":"natural_new_event_observation","status":"awaiting_real_events","detail":"No naturally generated new messages in initial two-cycle test. Never substitute stored history or generated fixtures for this observation."},
+    {"id":"dedicated_window_soak","status":"prepared_not_yet_completed","detail":"Observe actual runtime/soak segment logs and authorized end; do not infer duration from configuration."},
+    {"id":"extended_resilience","status":"future_optional","detail":"24-72h testing is a separate future exercise, not claimed within the user's present eight-hour authorization."},
+    {"id":"attachments_and_edits","status":"partial","detail":"Unknown/attachment content stays visibly incomplete; identity-content edits conflict rather than silently overwrite."}
   ]
 }

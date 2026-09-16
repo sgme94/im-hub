@@ -34,9 +34,10 @@ def prepare_visual_profile(base: Path, ui: dict, platform: str) -> dict:
         raise IMError('REVIEWED_VISUAL_PROFILE_REQUIRED')
     if ui.get('foreground_only') is not True:
         raise IMError('VISUAL_FOREGROUND_CLIENT_REQUIRED')
-    if platform != 'qq':
-        raise IMError('VISUAL_STRATEGY_CURRENTLY_TIM_ONLY')
-    required = TIM_ANCHORS
+    if platform not in ('qq', 'wecom'):
+        raise IMError('UNSUPPORTED_VISUAL_PLATFORM')
+    from .wecom_visual import WECOM_ANCHORS
+    required = TIM_ANCHORS if platform == 'qq' else WECOM_ANCHORS
     if not isinstance(ui.get('anchors'), dict) or set(ui['anchors']) != required:
         raise IMError('VISUAL_ANCHOR_SET_MISMATCH')
     result = {**ui, 'anchors': {}}
@@ -54,6 +55,30 @@ def prepare_visual_profile(base: Path, ui: dict, platform: str) -> dict:
     if isinstance(pages, bool) or not isinstance(pages, int) or not 1 <= pages <= 20:
         raise IMError('VISUAL_PAGE_LIMIT')
     result['max_pages'] = pages
+    if platform == 'wecom':
+        area = region(ui.get('message_region'))
+        # Only the middle message viewport, never left navigation, sidebar or input.
+        if area[0] < .2 or area[2] > .9 or area[1] < .05 or area[3] > .8:
+            raise IMError('WECOM_MESSAGE_REGION_UNSAFE')
+        colors = ui.get('bubble_colors')
+        if (not isinstance(colors, list) or not 1 <= len(colors) <= 4 or
+            any(not isinstance(c, list) or len(c) != 3 or
+                any(isinstance(v, bool) or not isinstance(v, int) or not 0 <= v <= 255 for v in c)
+                for c in colors)):
+            raise IMError('REVIEWED_BUBBLE_COLORS_REQUIRED')
+        result['message_region'], result['bubble_colors'] = area, colors
+        scroll = region(ui.get('scrollbar_region'))
+        offset = ui.get('scrollbar_bottom_offset')
+        if (scroll[2]-scroll[0]>.04 or scroll[0]<.5 or scroll[2]>.9 or scroll[3]>.82
+            or isinstance(offset,bool) or not isinstance(offset,int) or not 12<=offset<=120):
+            raise IMError('REVIEWED_SCROLLBAR_GEOMETRY_REQUIRED')
+        result['scrollbar_region'], result['scrollbar_bottom_offset'] = scroll, offset
+        for key in ('checkbox_off', 'checkbox_on'):
+            box = result['anchors'][key]['region']
+            if box[2] - box[0] > .1 or box[0] < .2 or box[2] > .9 or box[1] < .05 or box[3] > .88:
+                raise IMError('CHECKBOX_COLUMN_REGION_UNSAFE')
+            if result['anchors'][key].get('mode', 'gray') != 'gray':
+                raise IMError('CHECKBOX_GRAY_MATCH_REQUIRED')
     return result
 
 
@@ -150,6 +175,8 @@ class VisualSession:
         self.n.user.SetThreadDpiAwarenessContext.restype = ctypes.c_void_p
 
     def guard(self):
+        from .desktop_runtime import check_policy
+        check_policy()
         if time.monotonic() > self.deadline: raise IMError('DESKTOP_RUN_TIME_LIMIT')
         if self.n.input_tick() != self.last_input: raise IMError('USER_INPUT_DETECTED_PAUSED')
         if any(self.n.api.GetAsyncKeyState(k) & 0x8000 for k in (1, 2, 16, 17, 18)):
@@ -173,14 +200,20 @@ class VisualSession:
             if k.WaitForSingleObject(mutex, 0) not in (0, 0x80): raise IMError('DESKTOP_BUSY')
             locked = True
             old_dpi = self.n.user.SetThreadDpiAwarenessContext(ctypes.c_void_p(-4))
-            h = self.g.GetForegroundWindow()
-            self.pid = self.n.proc.GetWindowThreadProcessId(h)[1]
-            identity = self.n.process_identity(self.pid)
-            if not self.accepts(self.p['platform'], identity): raise IMError('BOUND_CLIENT_NOT_FOREGROUND')
-            self.version = identity[1]; self.n.pid = self.pid
+            from .desktop_runtime import check_policy, activate_bound
+            check_policy()
             self.last_input = self.n.input_tick(); self.deadline = time.monotonic() + 120
+            self.activated = False
             if (self.n.api.GetTickCount() - self.last_input) & 0xffffffff < 1500:
                 raise IMError('USER_ACTIVE_RETRY_WHEN_IDLE')
+            h = self.g.GetForegroundWindow()
+            pid = self.n.proc.GetWindowThreadProcessId(h)[1] if h else 0
+            identity = self.n.process_identity(pid) if pid else ('',None)
+            if not self.accepts(self.p['platform'], identity):
+                h = activate_bound(self)
+                pid = self.n.proc.GetWindowThreadProcessId(h)[1]
+                identity = self.n.process_identity(pid)
+            self.pid = pid; self.version = identity[1]; self.n.pid = self.pid
             self.guard()
             for key, spec in self.ui['anchors'].items():
                 data = read_blob(Path(spec['path']))
@@ -301,9 +334,12 @@ def acquire_visual(profile, folder):
     session=VisualSession(profile)
     with session.lease():
         if profile['platform']=='qq': blobs=session.tim(folder)
-        else: raise IMError('WECOM_VISUAL_CAPTURE_NOT_YET_CALIBRATED')
+        else:
+            from .wecom_visual import WeComReader
+            blobs=WeComReader(session).capture_pages()
     return blobs,{'transport':profile['transport'],'captured_at':now(),'ui_performed':True,
                   'client_version':session.version,'version_policy':'capability_probe_not_version_whitelist',
                   'driver':STRATEGY,'input_interruption_detected':False,'llm_calls':0,'ocr_calls':0,
                   'automated_actions':session.actions,'anchors':session.matches,'pages':session.pages,
-                  'history_complete':False,'requires_initial_foreground':True}
+                  'history_complete':False,'requires_initial_foreground':not session.activated,
+                  'client_activated_under_explicit_deadline':session.activated}

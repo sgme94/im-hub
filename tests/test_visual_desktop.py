@@ -27,8 +27,8 @@ class VisualProfileTests(unittest.TestCase):
     def test_foreground_precondition_not_silent_activation(self):
         p=profile();p['foreground_only']=False
         with self.assertRaisesRegex(IMError,'FOREGROUND'):prepare_visual_profile(Path.cwd(),p,'qq')
-    def test_unimplemented_wecom_visual_not_advertised(self):
-        with self.assertRaisesRegex(IMError,'TIM_ONLY'):prepare_visual_profile(Path.cwd(),profile(),'wecom')
+    def test_tim_profile_cannot_be_used_as_wecom(self):
+        with self.assertRaisesRegex(IMError,'ANCHOR_SET_MISMATCH'):prepare_visual_profile(Path.cwd(),profile(),'wecom')
     def test_source_version_is_not_required(self):
         for version in ('999',None):
             p=profile();p['client_version']=version

@@ -62,6 +62,7 @@ def main():
                '--specpath', str(target / 'spec'), '--paths', str(ROOT),
                '--collect-submodules', 'im_hub', '--collect-all', 'uiautomation',
                '--hidden-import', 'win32clipboard', '--hidden-import', 'win32process', '--hidden-import', 'win32security',
+               '--hidden-import', 'win32job', '--hidden-import', 'win32event', '--hidden-import', 'pywinauto',
                '--add-data', str(ROOT / 'im_hub/offline_guard.mjs') + ';im_hub', str(ROOT / 'scripts/frozen_entry.py')]
     with (target / 'pyinstaller.log').open('wb') as log:
         done = subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, timeout=600)
@@ -77,7 +78,8 @@ def main():
     python_license = Path(sys.base_prefix) / 'LICENSE.txt'
     if python_license.is_file(): shutil.copy2(python_license, legal / 'PYTHON-LICENSE.txt')
     python_dependencies = []
-    for name in ('pywin32', 'uiautomation', 'comtypes', 'pyinstaller', 'cryptography', 'cffi', 'pycparser'):
+    for name in ('pywin32', 'uiautomation', 'comtypes', 'pyinstaller', 'cryptography', 'cffi', 'pycparser',
+                 'pillow', 'opencv-python-headless', 'numpy', 'pywinauto', 'six'):
         distribution = importlib.metadata.distribution(name)
         copied = []
         for file in distribution.files or []:

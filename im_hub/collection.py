@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from .adapters import spec_for
-from .common import IMError, iso_epoch, label, load_json, read_blob
+from .common import IMError, digest, iso_epoch, label, load_json, read_blob
 from .store import ingest
 
 
@@ -16,7 +16,8 @@ def capabilities() -> dict:
         'cli': 'im-hub', 'frontend': False, 'llm_required': False,
         'llm_calls_in_core': 0, 'message_sending': False,
         'source_client_version_required': False, 'source_version_policy': 'capability_probe_not_version_whitelist',
-        'configured_file_collection': True, 'automatic_client_collection': False,
+        'configured_file_collection': True, 'automatic_client_collection': True,
+        'automatic_collection_scope': 'explicit_calibrated_sources_and_authorized_desktop_deadline',
         'configured_database_collection': True,
         'live_database_readers': ['kim-sqlite', 'wechat-live'], 'plaintext_cache_readers': ['wechat-sqlite'],
         'recoverable_acquisition_batches': True, 'collection_checkpoint_status': True,
@@ -24,11 +25,12 @@ def capabilities() -> dict:
             'wechat': {'input': ['normalized-v2', 'database-json'], 'database_transports': ['wechat-live', 'wechat-sqlite'], 'upstream': 'authenticated current encrypted DB and committed WAL using existing operator key cache; optional legacy plaintext cache', 'upstream_ui_required': False},
             'kim': {'input': ['normalized-v2', 'database-json'], 'database_transport': 'kim-sqlite', 'upstream': 'live read-only native SQLite', 'upstream_ui_required': False},
             'qq': {'input': ['tim-txt', 'tim-sequence-json', 'qce-json'], 'upstream': 'TIM official export with exact prefix reconciliation; QCE real login not accepted', 'tim_export_ui_required': True},
-            'wecom': {'input': ['wecom-native', 'wecom-json'], 'native_clipboard_capture': True, 'upstream': 'normal selected-message clipboard copy', 'upstream_ui_required': True},
+            'wecom': {'input': ['wecom-native', 'wecom-json'], 'native_clipboard_capture': True, 'upstream': 'automated single-native-message copies, bounded older paging and latest-view reset under reviewed visual profile', 'upstream_ui_required': True},
         },
         'desktop_driver': {'implemented': True, 'enabled_by_default': False, 'client_profile_calibration_required': True,
-                           'unattended_acceptance': False, 'strategy': 'bounded_semantic_state_machine', 'llm_required': False},
-        'product_operations': ['config-check', 'run', 'capture', 'desktop-status', 'export-all', 'report', 'verify', 'health', 'backup', 'restore'],
+                           'unattended_acceptance': False, 'long_duration_acceptance': 'inspect_run_evidence', 'strategies': ['bounded_semantic_state_machine','visual-anchors-v1'],
+                           'cross_client_activation': 'explicit_deadline_and_normal_verified_taskbar_button', 'llm_required': False},
+        'product_operations': ['config-check', 'run', 'soak', 'soak-status', 'capture', 'desktop-status', 'export-all', 'report', 'verify', 'health', 'backup', 'restore'],
         'analysis': {'current': 'deterministic keyword triage', 'semantic_llm': 'optional external consumer, not implemented'},
     }
 
@@ -46,7 +48,12 @@ def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=N
     if not re.fullmatch(r'[A-Za-z0-9_.-]{1,80}', source_name):
         raise IMError('INVALID_SOURCE_NAME')
     config = config.resolve()
-    document = load_json(read_blob(config))
+    import os
+    raw_config=read_blob(config)
+    expected=os.environ.get('IM_HUB_EXPECT_CONFIG_SHA256')
+    if expected is not None and digest(raw_config)!=expected:
+        raise IMError('SOAK_CONFIG_CHANGED_RESTART_REQUIRED')
+    document = load_json(raw_config)
     if not isinstance(document, dict) or document.get('version') != 1:
         raise IMError('SOURCE_CONFIG_VERSION_UNSUPPORTED')
     sources = document.get('sources')
