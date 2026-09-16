@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "sources": {
+    "tim-work": {
+      "enabled": false,
+      "transport": "tim-export",
+      "platform": "qq",
+      "account_namespace": "replace-with-reviewed-local-account",
+      "conversation_id": "replace-with-reviewed-conversation-alias",
+      "conversation_name": "替换为实际核验群名",
+      "source_epoch": "replace-with-reviewed-source-generation",
+      "data_class": "synthetic",
+      "export_mode": "full-history-append-only",
+      "max_records": 20000,
+      "input": "tim-full-history.txt",
+      "manifest": "tim-full-history.manifest.json"
+    },
+    "wecom-copy": {
+      "enabled": false,
+      "transport": "wecom-clipboard",
+      "platform": "wecom",
+      "account_namespace": "replace-with-reviewed-local-account",
+      "conversation_id": "replace-with-reviewed-conversation-alias",
+      "conversation_name": "替换为实际核验群名",
+      "source_epoch": "replace-with-reviewed-source-generation",
+      "data_class": "synthetic",
+      "binding": "replace-with-reviewed-native-field6",
+      "max_records": 100
+    }
+  }
+}

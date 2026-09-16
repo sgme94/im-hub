@@ -7,7 +7,7 @@ import importlib
 from pathlib import Path
 from .common import IMError, MAX_RECORDS, canonical, digest, iso_epoch, label, load_json, stamp, stream_key
 
-ADAPTERS = ('normalized-v2', 'database-json', 'tim-txt', 'wecom-json', 'wecom-native', 'qce-json')
+ADAPTERS = ('normalized-v2', 'database-json', 'tim-txt', 'tim-sequence-json', 'wecom-json', 'wecom-native', 'qce-json')
 
 def existing_module(folder: str, module: str):
     reviewed = {
@@ -24,7 +24,7 @@ def spec_for(platform: str, account: str, conversation: str, name: str, adapter:
     if platform not in ('wechat', 'kim', 'wecom', 'qq') or adapter not in ADAPTERS:
         raise IMError('UNSUPPORTED_ADAPTER')
     allowed = {'normalized-v2': ('wechat', 'kim'), 'database-json': ('wechat', 'kim'), 'tim-txt': ('qq',),
-               'wecom-json': ('wecom',), 'wecom-native': ('wecom',), 'qce-json': ('qq',)}
+               'tim-sequence-json': ('qq',), 'wecom-json': ('wecom',), 'wecom-native': ('wecom',), 'qce-json': ('qq',)}
     if platform not in allowed[adapter] or data_class not in ('real', 'synthetic'):
         raise IMError('ADAPTER_PLATFORM_MISMATCH')
     if adapter.startswith('wecom'):
@@ -133,6 +133,25 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
                 rows[-1]['upstream_observed_at'] = None
                 rows[-1]['source_time_basis'] = 'cache_read_not_client_sync' if platform == 'wechat' else 'local_database_read_not_server_sync'
         recognized = len(selected)
+    elif adapter == 'tim-sequence-json':
+        envelope = load_json(blob)
+        keys = ('platform', 'account_namespace', 'conversation_id', 'conversation_name', 'source_epoch', 'data_class')
+        if not isinstance(envelope, dict) or envelope.get('schema') != 'im-hub-tim-sequence/1' or envelope.get('binding') != {k: spec[k] for k in keys}:
+            raise IMError('TIM_SEQUENCE_BINDING_MISMATCH')
+        source = envelope.get('records')
+        if not isinstance(source, list) or not 1 <= len(source) <= MAX_RECORDS:
+            raise IMError('TIM_SEQUENCE_RECORD_LIMIT')
+        for i, r in enumerate(source):
+            if not isinstance(r, dict) or isinstance(r.get('ordinal'), bool) or r.get('ordinal') != i:
+                raise IMError('TIM_SEQUENCE_ORDINAL_MISMATCH')
+            flags = r.get('flags')
+            if not isinstance(flags, list) or any(not isinstance(f, str) for f in flags):
+                raise IMError('TIM_SEQUENCE_FLAGS_INVALID')
+            sender = label(r.get('sender'))
+            rows.append(_record(spec, 'tim-seq:' + str(i), 'full_export_exact_prefix_ordinal', r['timestamp'], r['text'],
+                0 if r['text'] and not flags else 99, digest(sender), sender, False,
+                {'source_ordinal': i, 'raw_sha256': envelope.get('raw_sha256')}, flags=flags))
+        recognized = len(rows)
     elif adapter == 'tim-txt':
         parser = existing_module('ui_boundary_20260915', 'desktop_readers')
         try:

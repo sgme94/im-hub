@@ -14,6 +14,8 @@ from .acquisition import collection_status
 from .common import DEFAULT_HOME, IMError, initialize, iso_epoch
 from .query import query_messages, source_status
 from .store import backend_info, ingest
+from .operations import config_check, run_sources, export_all, verify, backup, restore
+from .desktop_sources import desktop_status
 
 class Parser(argparse.ArgumentParser):
     def error(self, message):
@@ -52,10 +54,31 @@ def build_parser():
     commands.add_parser('init', help='Create a dedicated private ChatLab/provenance home')
     commands.add_parser('doctor', help='Check pinned local dependency; never install or log in')
     commands.add_parser('capabilities', help='Report implemented and pending capabilities; no client access')
-    c = commands.add_parser('collect', help='Explicit configured file or read-only database acquisition; no client UI automation')
+    commands.add_parser('clipboard-status', help='Read clipboard sequence only, never contents')
+    commands.add_parser('verify', help='Read-only message/provenance integrity check')
+    commands.add_parser('desktop-status', help='Read desktop acquisition checkpoints and errors')
+    cc = commands.add_parser('config-check', help='Validate profiles without reading a client')
+    cc.add_argument('--config', required=True, type=Path)
+    rr = commands.add_parser('run', help='One ordered pass over configured sources; no schedule installed')
+    rr.add_argument('--config', required=True, type=Path)
+    rr.add_argument('--source', action='append')
+    rr.add_argument('--dry-run', action='store_true')
+    rr.add_argument('--allow-ui', action='store_true')
+    rr.add_argument('--reconcile', action='store_true')
+    ea = commands.add_parser('export-all', help='Export every matching imported message into a private JSONL evidence package')
+    filters(ea, query=True)
+    ea.add_argument('--max-records', type=int, default=100000)
+    bk = commands.add_parser('backup', help='Create a private create-only ZIP; contains sensitive data and is not encrypted')
+    bk.add_argument('--output', required=True, type=Path)
+    rs = commands.add_parser('restore', help='Restore verified backup into a NEW directory only')
+    rs.add_argument('--input', required=True, type=Path)
+    rs.add_argument('--destination', required=True, type=Path)
+    c = commands.add_parser('collect', help='Explicit configured file/database/native acquisition; desktop actions require --allow-ui')
     c.add_argument('--config', required=True, type=Path)
     c.add_argument('--source', required=True)
     c.add_argument('--dry-run', action='store_true')
+    c.add_argument('--allow-ui', action='store_true', help='Allow reviewed desktop profile actions for this explicit collection only')
+    c.add_argument('--after-sequence', type=int, help='Baseline from clipboard-status before normal WeCom message copy')
     c.add_argument('--until', help='Database-only exclusive end time, with explicit timezone')
     c.add_argument('--reconcile', action='store_true', help='Database-only full configured-window scan for older late arrivals')
     cs = commands.add_parser('collection-status', help='Read acquisition checkpoints, pending runs and errors without collection')
@@ -101,7 +124,24 @@ def main(argv=None):
         elif a.command == 'capabilities':
             data = capabilities()
         elif a.command == 'collect':
-            data = collect(home, a.config, a.source, a.dry_run, until=a.until, reconcile=a.reconcile)
+            data = collect(home, a.config, a.source, a.dry_run, until=a.until, reconcile=a.reconcile, allow_ui=a.allow_ui, after_sequence=a.after_sequence)
+        elif a.command == 'config-check':
+            data = config_check(a.config)
+        elif a.command == 'run':
+            data = run_sources(home, a.config, a.source, a.dry_run, a.allow_ui, a.reconcile)
+        elif a.command == 'export-all':
+            data = export_all(home, query_args(a), a.max_records)
+        elif a.command == 'verify':
+            data = verify(home)
+        elif a.command == 'backup':
+            data = backup(home, a.output)
+        elif a.command == 'restore':
+            data = restore(a.input, a.destination)
+        elif a.command == 'clipboard-status':
+            from .windows_desktop import clipboard_status
+            data = clipboard_status()
+        elif a.command == 'desktop-status':
+            data = desktop_status(home)
         elif a.command == 'collection-status':
             data = collection_status(home, a.source)
         elif a.command == 'doctor':
@@ -132,8 +172,9 @@ def main(argv=None):
             data = validate_candidates(home, a.input)
         else:
             raise IMError('UNKNOWN_COMMAND')
-        print(json.dumps({'ok': True, 'command': a.command, 'data': data}, ensure_ascii=False, allow_nan=False))
-        return 0
+        succeeded = not (a.command == 'run' and data.get('success') is False)
+        print(json.dumps({'ok': succeeded, 'command': a.command, 'data': data}, ensure_ascii=False, allow_nan=False))
+        return 0 if succeeded else 4
     except IMError as exc:
         print(json.dumps({'ok': False, 'error': {'code': exc.code}, 'source_refreshed': False}))
         return 3 if exc.code in ('WRITER_BUSY', 'DATASET_CHANGED_RETRY_QUERY', 'CURSOR_STALE_RESTART_QUERY') else 2

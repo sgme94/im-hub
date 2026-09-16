@@ -6,9 +6,9 @@
 
 ## 当前状态
 
-`v0.3.0` 新增 KIM 原生 SQLite 的可恢复增量采集、微信受控明文分片读取，以及采集状态/断点恢复。保留已有文件/原生载荷解析、ChatLab 导入回读、跨平台查询、覆盖时效、证据导出与规则初筛。
+`v0.4.0rc1` 是带 Windows 安装脚本的交付候选版：新增 TIM 严格追加导入、原生剪贴板/可选桌面采集入口、多来源 `run`、完整 `export-all`、数据 `verify`、`backup/restore`。保留 KIM 原生 SQLite、微信明文分片和旧文件接入。见 [交付手册与验收边界](docs/DELIVERY.md)。
 
-**尚未交付**：微信加密客户端实时刷新、自动启动客户端导出、TIM 多群导航、企微连续翻页全采、无人值守调度、大模型语义分析。KIM 当前本地库可直接读取，微信只读已存在的明文缓存；两者都不证明服务端历史完整。
+**尚未完成生产验收**：TIM/企微自动桌面驱动的本机控件校准与真实完整采集、微信加密客户端实时刷新、连续无人值守及附件/撤回完整语义。桌面驱动存在不等于真实可用，默认不启用；本版不宣称四路无人值守成品已全部完成。大模型语义分析仍为外部可选消费者。
 
 | 来源 | 已验证的上游路线 | 本项目输入适配 | LLM 是否必需 |
 |---|---|---|---|
@@ -18,7 +18,23 @@
 | 企业微信 | 正常选中复制后的原生载荷 | `wecom-native` / `wecom-json` | 否 |
 | QCE 备选 | 已验证合成导出，真实登录未验收 | `qce-json` | 否 |
 
-**无前端不等于上游客户端无 GUI。** TIM 发起导出、企微定位和复制仍需要桌面；计划使用确定性状态机/UI 自动化，不把 LLM 作为采集依赖。前序实验中的人工/Agent 视觉观察还没有全部固化成长期稳定的自动导航器。
+**无前端不等于上游客户端无 GUI。** TIM 发起导出、企微定位和复制仍需要桌面；可选驱动使用确定性状态机/UI 自动化，不把 LLM 作为采集依赖，但仍需本机实测后启用。前序实验中的人工/Agent 视觉观察还没有全部固化成长期稳定的自动导航器。
+
+## 候选包安装与新增命令
+
+从 Release 解压后运行 `install.ps1`；也可安装 wheel。安装不覆盖已有目录、不改全局 PATH、不启用客户端或定时任务。
+
+```powershell
+im-hub config-check --config sources.local.json
+im-hub --home state run --config sources.local.json --dry-run
+im-hub --home state run --config sources.local.json
+im-hub --home state export-all '迁移' --max-records 100000
+im-hub --home state verify
+im-hub --home state backup --output 'C:\\Backups\\im-hub-001.zip'
+im-hub restore --input 'C:\\Backups\\im-hub-001.zip' --destination 'C:\\IMHubRestored'
+```
+
+`run` 只执行一次；部分失败退出码 4。备份包含敏感消息且不加密。`restore` 只写新目录，配置不随备份恢复。桌面源需校准 profile 和显式 `--allow-ui`；正常手动复制入口需 `clipboard-status` 基线。详情见交付手册。
 
 ## 安装
 

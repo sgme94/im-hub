@@ -25,7 +25,10 @@ def capabilities() -> dict:
             'qq': {'input': ['tim-txt', 'qce-json'], 'upstream': 'TIM official export; QCE real login not accepted', 'tim_export_ui_required': True},
             'wecom': {'input': ['wecom-native', 'wecom-json'], 'upstream': 'normal selected-message clipboard copy', 'upstream_ui_required': True},
         },
-        'desktop_driver': {'implemented': False, 'planned': 'bounded deterministic state machine', 'llm_required': False},
+        'desktop_driver': {'implemented': True, 'mode': 'opt_in_reviewed_semantic_profile', 'real_ui_acceptance': False, 'llm_required': False},
+        'tim_append_only_export_reconciliation': True, 'native_wecom_clipboard_capture': True,
+        'batch_run': True, 'complete_query_export': True, 'backup_restore': True,
+        'production_release_gate': 'desktop_real_acceptance_and_wechat_refresh_pending',
         'analysis': {'current': 'deterministic keyword triage', 'semantic_llm': 'optional external consumer, not implemented'},
     }
 
@@ -38,7 +41,8 @@ def _path(base: Path, value: object) -> Path:
     return (candidate if candidate.is_absolute() else base / candidate).resolve()
 
 
-def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=None, until=None, reconcile=False) -> dict:
+def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=None, until=None, reconcile=False,
+            allow_ui=False, after_sequence=None) -> dict:
     if not re.fullmatch(r'[A-Za-z0-9_.-]{1,80}', source_name):
         raise IMError('INVALID_SOURCE_NAME')
     config = config.resolve()
@@ -51,6 +55,11 @@ def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=N
     profile = sources[source_name]
     if not isinstance(profile, dict) or profile.get('enabled') is not True:
         raise IMError('SOURCE_NOT_ENABLED')
+    if profile.get('transport') in ('tim-export', 'tim-ui', 'wecom-clipboard', 'wecom-ui'):
+        if until is not None or reconcile:
+            raise IMError('DATABASE_ONLY_COLLECTION_OPTION')
+        from .desktop_sources import collect_desktop
+        return collect_desktop(home, config.parent, source_name, profile, dry_run, backend, allow_ui, after_sequence)
     if profile.get('transport') in ('kim-sqlite', 'wechat-sqlite'):
         from .acquisition import collect_database
         return collect_database(home, config.parent, source_name, profile, dry_run, backend, until, reconcile)

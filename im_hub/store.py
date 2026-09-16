@@ -7,6 +7,7 @@ import os
 import shutil
 import sqlite3
 import subprocess
+import sys
 import uuid
 from pathlib import Path
 from . import __version__
@@ -14,7 +15,27 @@ from .adapters import normalize
 from .common import (ROOT, IMError, binding_spec, canonical, check_home, db_path, digest,
                      iso_epoch, load_json, now, read_blob, readonly, stream_key, write_new, writer)
 
-CHATLAB = Path(os.environ.get('IM_HUB_CHATLAB_DIR', str(ROOT / 'node_modules/chatlab-cli'))).expanduser().resolve()
+def resolve_backend_location():
+    default = ROOT / 'node_modules/chatlab-cli'
+    explicit = os.environ.get('IM_HUB_CHATLAB_DIR')
+    if explicit:
+        return Path(explicit).expanduser().resolve(), False
+    config = Path(sys.prefix) / 'im-hub-runtime.json'
+    if not config.is_file():
+        return default, False
+    try:
+        if config.stat().st_size > 32768:
+            raise ValueError()
+        meta = json.loads(config.read_text('utf-8-sig'))
+        path = meta.get('chatlab_directory')
+        if meta.get('schema') != 'im-hub-runtime/1' or not isinstance(path, str):
+            raise ValueError()
+        return Path(path).expanduser().resolve() if path else default, False
+    except (OSError, ValueError, TypeError, AttributeError):
+        # Queries do not require optional backend configuration; imports fail closed.
+        return default, True
+
+CHATLAB, BACKEND_CONFIG_ERROR = resolve_backend_location()
 NODE = Path(os.environ.get('IM_HUB_NODE') or shutil.which('node') or 'node')
 GUARD = Path(__file__).with_name('offline_guard.mjs')
 
@@ -24,7 +45,8 @@ def backend_info() -> dict:
     version = meta.get('version')
     return {'installed_version': version, 'required_version': '0.37.1',
             'node_available': NODE.is_file(), 'offline_guard_available': GUARD.is_file(),
-            'ready': meta.get('name') == 'chatlab-cli' and version == '0.37.1'
+            'runtime_backend_config_valid': not BACKEND_CONFIG_ERROR,
+            'ready': not BACKEND_CONFIG_ERROR and meta.get('name') == 'chatlab-cli' and version == '0.37.1'
                      and NODE.is_file() and GUARD.is_file() and (CHATLAB / 'bin/chatlab.mjs').is_file()}
 
 def run_chatlab(home: Path, args: list[str]) -> dict:

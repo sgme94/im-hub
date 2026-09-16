@@ -1,0 +1,131 @@
+{
+  "version": "0.4.0rc1",
+  "recorded_at": "2026-09-16T07:07:35.394324+00:00",
+  "code_sha256": {
+    "im_hub/__init__.py": "c3791044591e4e3ba591f415dad65caada80be58a4708c81ea79f78a8664cfd1",
+    "im_hub/__main__.py": "8134dc71036ab6fef7cb605ec59b400b2864890fc00526f9763c447e2937e295",
+    "im_hub/acquisition.py": "4f0567d967d701fc7ac6a67e1fa19aaca39763fd2113cf4373ce59a909a7c309",
+    "im_hub/adapters.py": "8bcf808c260c6a45b7d726f9288d805fecde9f68283cf90dcf65106b7e61da91",
+    "im_hub/analysis.py": "ffd7c73d416c30c8c452121548ba3156213e805437a8d66b62812bf819f8e20b",
+    "im_hub/cli.py": "487bf84696b277a64c4c86f5557ec8087d4e8eb1816f15d9fc1e229734bd5145",
+    "im_hub/codecs/__init__.py": "a961238da62de16a715ade4af94e49fecde8a8cdf43d5fccb3611ead02122424",
+    "im_hub/codecs/desktop.py": "3674c615fb7a9cad2b75a9f5de27eb22fc4cd032a6104ab67a8441fce0ecf7ac",
+    "im_hub/codecs/qce.py": "9eb2aa10c37b1c8c6463fc12f4cbe78b5281de34f63012336a63287c2114c492",
+    "im_hub/codecs/wecom_wire.py": "2f2de410d26458fcd60beb9655bb82790cddf763c4d59aa12accec4d82faa841",
+    "im_hub/collection.py": "7052d31b8e980caa1c04f112cf9fe0ae9b35219f1fb8213af3136dfb3348bd02",
+    "im_hub/common.py": "89309c235f461862791ffa9a923f700063a45163ae990ea1b20870a2f718f4b6",
+    "im_hub/database_readers.py": "1dbd71801ae6066c6aa9b9000714de501f77550f7e764eae9570cc0b00dab3e8",
+    "im_hub/desktop_sources.py": "89f38aaf46540cc66b5fdbd70aa3b57798d320d912181a077fa763b0fe921afc",
+    "im_hub/operations.py": "1bca5fb05e9ed6d83d6522eb81d2711f669c2aa3390f59f179071051540c4928",
+    "im_hub/query.py": "0619d9a8940b5f461054bd0de3947acbf1e3de92cfa7ee340103a7c330b208e8",
+    "im_hub/store.py": "e471a2d7b060ca3ecbffe7bc3e7b623228a4e75aad7649ee64d7431ed245ba5b",
+    "im_hub/windows_desktop.py": "76bd1a0bc6e91910bfffa67a8a07f1dadc41e671e9127b89ad8823e5e4e78dd9",
+    "packaging/install.ps1": "5bcd34625e6641f72622f76189f88a2f12d8f0ca1801baaaebc8d692b673d12c",
+    "scripts/build_delivery.py": "ac5f00ae93b15b22730ecbfa81ceaa90676ae406ff04680f18ef463c7c35f13f",
+    "scripts/check_database_smoke.py": "63cfc7d11111b5d273bef9c796d36f9407abdff3466c6a949610ea54fbc7b42a",
+    "scripts/check_legacy.py": "9e943e44b4a6bc1d7e40c578d08cdcd003b71a857e347bd34e12cd695eb55b64",
+    "scripts/check_product_smoke.py": "7d39c2c5e71da3a8a6347f49fe3f675ea17e2d77d00c43b3a961278a4de94d02",
+    "scripts/make_demo.py": "51ef7bc7a9ced2baaa56cbd3690d36d8905257f7e81904d387f69822497d1ad4",
+    "tests/test_collection.py": "0a1ade19e1df51c11b000de96973b724f2f37bac178aa4d3e65205299512c692",
+    "tests/test_core.py": "713891656bb17e3c7dd73c4946affba133becff81e2959b764df8d7b2b24cfe2",
+    "tests/test_database_collection.py": "8bacd5228513e1d281afce0967df1e4189631945dc29af626631e91983ee61e0",
+    "tests/test_product_delivery.py": "ae664157c2b3b9c3e1748c72362eb2af2562c764162db95d2abf62dfe32b500e"
+  },
+  "hash_scope": "working_tree_file_bytes",
+  "validation": {
+    "unit": {
+      "tests": 122,
+      "failures": 0,
+      "errors": 0
+    },
+    "backend": {
+      "actual_backend": "chatlab-cli0.37.1",
+      "batch_run_replay_new": 0,
+      "complete_export_records": 3,
+      "core_llm_calls": 0,
+      "data": "synthetic_only",
+      "ok": true,
+      "production_desktop_accepted": false,
+      "restored_message_keys_exact": true,
+      "restored_records": 3,
+      "same_second_same_text_distinct": true,
+      "tim_full_export_initial_replay_append_replay": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "ui_performed": false
+    },
+    "real": {
+      "LLM_calls": 0,
+      "accepted_at": "2026-09-16T07:07:35.378211+00:00",
+      "backup_restore_records": 4721,
+      "complete_export_messages": 4721,
+      "data_scope": "previously_authorized_real_exports_not_new_client_reads",
+      "new_UI_performed": false,
+      "platforms": [
+        {
+          "input": "previous_real_export",
+          "physical_readback": {
+            "checked": 52,
+            "quick_check": "ok"
+          },
+          "platform": "wechat",
+          "records": 52,
+          "repeat_new": 0
+        },
+        {
+          "input": "previous_real_export",
+          "physical_readback": {
+            "checked": 9,
+            "quick_check": "ok"
+          },
+          "platform": "kim",
+          "records": 9,
+          "repeat_new": 0
+        },
+        {
+          "cross_new_live_export_not_tested": true,
+          "input": "previous_official_full_TXT",
+          "new_export_performed": false,
+          "physical_readback": {
+            "checked": 4657,
+            "quick_check": "ok"
+          },
+          "platform": "qq",
+          "records": 4657,
+          "repeat_new": 0
+        },
+        {
+          "input": "previous_native_enriched_JSON",
+          "new_copy_performed": false,
+          "physical_readback": {
+            "checked": 3,
+            "quick_check": "ok"
+          },
+          "platform": "wecom",
+          "records": 3,
+          "repeat_new": 0
+        }
+      ],
+      "production_desktop_accepted": false,
+      "restored_export_sha256_exact": true,
+      "source_files_changed": false,
+      "total_physical_messages": 4721,
+      "version": "0.4.0rc1"
+    }
+  },
+  "full_requested_product_accepted": false,
+  "release_channel": "candidate",
+  "remaining_acceptance": [
+    "live_TIM_UI_export",
+    "live_WeCom_UI_history",
+    "encrypted_WeChat_upstream_refresh",
+    "unattended_runtime"
+  ],
+  "no_schedules_created": true,
+  "no_messages_sent": true,
+  "parallel_checkout_preserved": true,
+  "installer_validation": "recorded_separately_in_INSTALL_ACCEPTANCE.json_after_fresh_install"
+}
