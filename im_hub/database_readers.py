@@ -13,7 +13,7 @@ from pathlib import Path
 from .common import IMError, canonical, digest, iso_epoch, label, now, readonly
 
 BINDING_KEYS = ('platform', 'account_namespace', 'conversation_id', 'conversation_name', 'source_epoch', 'data_class')
-TRANSPORTS = ('kim-sqlite', 'wechat-sqlite')
+TRANSPORTS = ('kim-sqlite', 'wechat-sqlite', 'wechat-live')
 MAX_BODY_BYTES = 1_000_000
 
 
@@ -73,9 +73,19 @@ def prepare_profile(base: Path, profile: dict) -> dict:
             if path.parent != account:
                 raise IMError('ACCOUNT_DIRECTORY_BINDING_MISMATCH')
             p['shards'].append({'id': item['id'], 'path': str(path)})
+            if p['transport'] == 'wechat-live':
+                key_id = label(item.get('key_id'), 'EXPLICIT_CACHED_KEY_ID_REQUIRED').replace('\\', '/')
+                if '..' in key_id.split('/') or key_id.startswith('/'):
+                    raise IMError('INVALID_CACHED_KEY_ID')
+                p['shards'][-1]['key_id'] = key_id
         if len({s['id'] for s in p['shards']}) != len(shards) or len({s['path'] for s in p['shards']}) != len(shards):
             raise IMError('DUPLICATE_SHARD_BINDING')
         p['source_kind'] = 'plaintext_cache'
+        if p['transport'] == 'wechat-live':
+            if p.get('key_policy') != 'existing-only':
+                raise IMError('EXISTING_KEY_ONLY_POLICY_REQUIRED')
+            p['existing_key_file'] = str(local_path(base, p.get('existing_key_file')))
+            p['source_kind'] = 'authenticated_local_database'
     return p
 
 

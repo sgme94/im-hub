@@ -89,6 +89,10 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
             acquisition = envelope.get('acquisition')
             kind = 'plaintext_cache' if platform == 'wechat' else 'native_local_database'
             transport = 'wechat-sqlite' if platform == 'wechat' else 'kim-sqlite'
+            if isinstance(acquisition, dict) and platform == 'wechat' and acquisition.get('transport') == 'wechat-live':
+                kind, transport = 'authenticated_local_database', 'wechat-live'
+                if acquisition.get('page_authentication_verified') is not True or acquisition.get('new_key_extraction') is not False:
+                    raise IMError('AUTHENTICATED_SOURCE_PROOF_REQUIRED')
             if not isinstance(acquisition, dict) or acquisition.get('source_kind') != kind or acquisition.get('transport') != transport or acquisition.get('local_window_read_complete') is not True:
                 raise IMError('DATABASE_ACQUISITION_METADATA_INVALID')
             iso_epoch(acquisition.get('observed_at'))
@@ -134,7 +138,7 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
             if acquisition is not None:
                 rows[-1]['source_kind'] = acquisition['source_kind']
                 rows[-1]['upstream_observed_at'] = None
-                rows[-1]['source_time_basis'] = 'cache_read_not_client_sync' if platform == 'wechat' else 'local_database_read_not_server_sync'
+                rows[-1]['source_time_basis'] = 'cache_read_not_client_sync' if acquisition['source_kind'] == 'plaintext_cache' else 'local_database_read_not_server_sync'
         recognized = len(selected)
     elif adapter == 'tim-txt':
         parser = existing_module('ui_boundary_20260915', 'desktop_readers')
@@ -216,9 +220,12 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
     if acquisition is not None:
         coverage.update({'scope': 'configured_local_database_window', 'source_kind': acquisition['source_kind'],
                          'transport': acquisition['transport'], 'local_window_read_complete': True,
-                         'snapshot_consistency': 'per_database_read_transaction', 'atomic_across_databases': False,
+                         'snapshot_consistency': acquisition.get('snapshot_consistency', 'per_database_read_transaction'), 'atomic_across_databases': False,
                          'database_count': acquisition.get('database_count'), 'client_sync_verified': False,
                          'upstream_observed_at': None})
+        if acquisition['transport'] == 'wechat-live':
+            coverage.update({'page_authentication_verified': True, 'wal': acquisition.get('wal'),
+                             'existing_key_cache_used': True, 'new_key_extraction': False})
         if acquisition['source_kind'] == 'plaintext_cache':
             coverage['gaps'] += ['upstream_cache_refresh_time_unknown', 'encrypted_client_refresh_not_implemented']
     return selected, coverage

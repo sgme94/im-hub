@@ -210,9 +210,14 @@ class ProductTests(unittest.TestCase):
         self.p.update({'transport': 'tim-ui', 'desktop': ui_profile()}); self.save_config()
         with self.assertRaisesRegex(IMError, 'UI_CONSENT_REQUIRED'): self.collect()
 
-    def test_ui_declared_version_is_not_auto_adopted(self):
-        ui = ui_profile(); ui['client_version'] = '999'
-        with self.assertRaisesRegex(IMError, 'VERSION_NOT_REVIEWED'): validate_profile(ui, 'qq', '测试群')
+    def test_ui_version_is_telemetry_not_admission(self):
+        for version in ('999', '5.0.11.6018', None):
+            ui = ui_profile(); ui['client_version'] = version
+            result = validate_profile(ui, 'qq', '测试群')
+            self.assertTrue(result['valid'])
+            self.assertFalse(result['source_client_version_required'])
+        ui = ui_profile(); del ui['client_version']
+        self.assertTrue(validate_profile(ui, 'qq', '测试群')['valid'])
 
     def test_ui_no_arbitrary_actions_or_send(self):
         for bad in ['send', 'shell', 'type', 'delete']:

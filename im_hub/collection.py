@@ -15,12 +15,13 @@ def capabilities() -> dict:
     return {
         'cli': 'im-hub', 'frontend': False, 'llm_required': False,
         'llm_calls_in_core': 0, 'message_sending': False,
+        'source_client_version_required': False, 'source_version_policy': 'capability_probe_not_version_whitelist',
         'configured_file_collection': True, 'automatic_client_collection': False,
         'configured_database_collection': True,
-        'live_database_readers': ['kim-sqlite'], 'plaintext_cache_readers': ['wechat-sqlite'],
+        'live_database_readers': ['kim-sqlite', 'wechat-live'], 'plaintext_cache_readers': ['wechat-sqlite'],
         'recoverable_acquisition_batches': True, 'collection_checkpoint_status': True,
         'platforms': {
-            'wechat': {'input': ['normalized-v2', 'database-json'], 'database_transport': 'wechat-sqlite', 'upstream': 'explicit already-plaintext cache; encrypted-client refresh not implemented', 'upstream_ui_required': False},
+            'wechat': {'input': ['normalized-v2', 'database-json'], 'database_transports': ['wechat-live', 'wechat-sqlite'], 'upstream': 'authenticated current encrypted DB and committed WAL using existing operator key cache; optional legacy plaintext cache', 'upstream_ui_required': False},
             'kim': {'input': ['normalized-v2', 'database-json'], 'database_transport': 'kim-sqlite', 'upstream': 'live read-only native SQLite', 'upstream_ui_required': False},
             'qq': {'input': ['tim-txt', 'tim-sequence-json', 'qce-json'], 'upstream': 'TIM official export with exact prefix reconciliation; QCE real login not accepted', 'tim_export_ui_required': True},
             'wecom': {'input': ['wecom-native', 'wecom-json'], 'native_clipboard_capture': True, 'upstream': 'normal selected-message clipboard copy', 'upstream_ui_required': True},
@@ -54,7 +55,7 @@ def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=N
     profile = sources[source_name]
     if not isinstance(profile, dict) or profile.get('enabled') is not True:
         raise IMError('SOURCE_NOT_ENABLED')
-    if profile.get('transport') in ('kim-sqlite', 'wechat-sqlite'):
+    if profile.get('transport') in ('kim-sqlite', 'wechat-sqlite', 'wechat-live'):
         from .acquisition import collect_database
         return collect_database(home, config.parent, source_name, profile, dry_run, backend, until, reconcile)
     if profile.get('transport') in ('tim-export', 'tim-ui', 'wecom-clipboard', 'wecom-ui'):

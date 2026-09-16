@@ -1,0 +1,148 @@
+{
+  "started_at": "2026-09-16T10:34:05.536435+00:00",
+  "completed_at": "2026-09-16T10:34:44.497479+00:00",
+  "passes": [
+    {
+      "cycle": 1,
+      "items": [
+        {
+          "source": "wechat-live-work",
+          "new_records": 0,
+          "duplicates": 62,
+          "duration_seconds": 2.719,
+          "source_observed_at": "2026-09-16T10:34:05.813623+00:00",
+          "kind": "authenticated_local_database",
+          "database_read_performed": true,
+          "page_authentication_verified": true,
+          "record_count": 62,
+          "local_scan_until": "2026-09-16T10:34:05+00:00"
+        },
+        {
+          "source": "kim-work",
+          "new_records": 0,
+          "duplicates": 0,
+          "duration_seconds": 0.234,
+          "source_observed_at": "2026-09-16T10:34:08.411093+00:00",
+          "kind": "native_local_database",
+          "database_read_performed": true,
+          "page_authentication_verified": null,
+          "record_count": 0,
+          "local_scan_until": "2026-09-16T10:34:08+00:00"
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "items": [
+        {
+          "source": "wechat-live-work",
+          "new_records": 0,
+          "duplicates": 62,
+          "duration_seconds": 2.516,
+          "source_observed_at": "2026-09-16T10:34:23.709505+00:00",
+          "kind": "authenticated_local_database",
+          "database_read_performed": true,
+          "page_authentication_verified": true,
+          "record_count": 62,
+          "local_scan_until": "2026-09-16T10:34:23+00:00"
+        },
+        {
+          "source": "kim-work",
+          "new_records": 0,
+          "duplicates": 0,
+          "duration_seconds": 0.203,
+          "source_observed_at": "2026-09-16T10:34:26.144997+00:00",
+          "kind": "native_local_database",
+          "database_read_performed": true,
+          "page_authentication_verified": null,
+          "record_count": 0,
+          "local_scan_until": "2026-09-16T10:34:26+00:00"
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "items": [
+        {
+          "source": "wechat-live-work",
+          "new_records": 0,
+          "duplicates": 62,
+          "duration_seconds": 2.531,
+          "source_observed_at": "2026-09-16T10:34:41.440020+00:00",
+          "kind": "authenticated_local_database",
+          "database_read_performed": true,
+          "page_authentication_verified": true,
+          "record_count": 62,
+          "local_scan_until": "2026-09-16T10:34:41+00:00"
+        },
+        {
+          "source": "kim-work",
+          "new_records": 0,
+          "duplicates": 0,
+          "duration_seconds": 0.219,
+          "source_observed_at": "2026-09-16T10:34:43.900580+00:00",
+          "kind": "native_local_database",
+          "database_read_performed": true,
+          "page_authentication_verified": null,
+          "record_count": 0,
+          "local_scan_until": "2026-09-16T10:34:43+00:00"
+        }
+      ]
+    }
+  ],
+  "records_verified": 71,
+  "source_client_version_required": false,
+  "old_wechat_cache_baseline_records": 52,
+  "source_events_after_test_start": 0,
+  "new_event_evidence_refs": [],
+  "query_read_only_verified": true,
+  "ui_actions": 0,
+  "runtime_llm_calls": 0,
+  "new_key_extraction": false,
+  "existing_wechat_key_cache_used": true,
+  "four_platform_final_accepted": false,
+  "pending": [
+    "TIM_and_WeCom_live_UI_acceptance",
+    "real_new_events_during_observation_window_if_zero"
+  ],
+  "version": "1.0.0rc2",
+  "unit_tests": 146,
+  "unit_failures": 0,
+  "unit_errors": 0,
+  "source_hashes": {
+    "im_hub/__init__.py": "e4af11e6b742d1e599fd922378d32f2df7b8f079dc188362e4abb95f92863767",
+    "im_hub/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "im_hub/acquisition.py": "8e3f8558903530b93bf171bcaae6f5645168c70a87e7c6dc3294bde8ef4ae236",
+    "im_hub/adapters.py": "24c8e03e956406dfcbb9f8c2b4f19b08cf34a06be081a56794d381ead4e24df4",
+    "im_hub/analysis.py": "eca38311d817eb93f382bb3d4b0a60603f4ff6ac0304be42aed12ce944d10fbf",
+    "im_hub/cli.py": "cec5698943670973c0761a88a065f9ca54f475aeea3f38cc4f8b5ddbaf74ac0d",
+    "im_hub/codecs/__init__.py": "d0d298d8d4f10ae78493dfa76718e66c3b84ffcc9069b8f6745f61da96035806",
+    "im_hub/codecs/desktop.py": "498df7e15772eaf0a0ab938d5c971b8f2aa637bd876bc13f0b58b739deefb0e9",
+    "im_hub/codecs/qce.py": "acff41dd2c73e59b2f5f82bc0a6b9ea56eaf34b5ffadd87ea06178f1c2d0d83c",
+    "im_hub/codecs/wecom_wire.py": "8c231cc3c32b13ae4879e8ac242350d177096f4c950cd30a9297730ccb9bd78c",
+    "im_hub/collection.py": "3d2bd00dbac336b4a4be15c6ccd7d3a0a21c9b2f03d2edaa1b14ccea472dd1dd",
+    "im_hub/common.py": "6878067b848aaecccdb318c8d8e5b52af942ae7b5018dbb46c77c0b782b483c9",
+    "im_hub/database_readers.py": "a903dac54c1f6033d99a111e5edb94dd9b5f3edaa18ead5b2ab5051530961d94",
+    "im_hub/desktop_sources.py": "0cff3b2fadb61a3c1626143f07292c542732c06252ff0643eb27dae6cdb9e368",
+    "im_hub/operations.py": "f5fd80d125d7e85a0eecc6b344e618a4d3d6f750c2c06fb95239ecddb37cc6ec",
+    "im_hub/query.py": "95f8d1f2f8ab3650bdef9731689696ba56a38c05f9eb0d403b6cb16cc8b10e8c",
+    "im_hub/selftest.py": "d356c8135bc1b1f8a85e2a66f7474d11dcf2be6c2c5ca0f792dba36814735fbf",
+    "im_hub/store.py": "6b0b265297acc8a8f8288b1417b2e3b9da874717fa2dd8e48f748743630dfc04",
+    "im_hub/tim_sequence.py": "35c86a8972c34f094e7eb096f64208de93b81f14cfc1ca9dc5e5c97c7f017e5e",
+    "im_hub/wechat_live.py": "955ee7e2eca203fd176ffd819021f21eba625c2f41ded4f1baf93b2bc9bc1cc9",
+    "im_hub/windows_desktop.py": "87f73118602e9ea39e40ad785c7964e76c5d3373d2b7c7feb02cd95ecafb055b",
+    "pyproject.toml": "95b480389da7147434b94cc31b0f18459c33b29b43b0617013d241c6cc996d04",
+    "scripts/build_windows.py": "0c4bb53f12cf47c7479b598f399785ae48ab00884e9df0ff1dcb8bd14a8eb758",
+    "tests/test_collection.py": "894bfc8360857cd9004fc2635c586327a6e70cf680b2bac6258dcd0fc508cc84",
+    "tests/test_core.py": "f3b9687167fc95385c154fbb55285ae78e40857e08410db2fb9761b8ba9e38fc",
+    "tests/test_database_collection.py": "92b575cc83c6538030c5016c05f83e5444faf5ee30641e2a42a6efa25a9e43e8",
+    "tests/test_product.py": "623df5fef341dd7a733fce7194f504c3fd2be29ab7688b3f379ab215148d4d18",
+    "tests/test_version_policy.py": "2b7bf0b7f410b8f7e77df4a56a946ad16d8e97bbcc56e2c72fe5db12adf79795",
+    "tests/test_wechat_live.py": "b36497e1e33b44382d81ed7441c1ffb3d00cd820f3ea2a6c25bce87a0262e76d"
+  },
+  "source_versions_are_diagnostic_only": true,
+  "current_wecom_accessibility_nodes": 3,
+  "current_wecom_accessible_message_nodes": 0,
+  "desktop_currently_in_use": true,
+  "missing_version_resource_exception_tested": true
+}

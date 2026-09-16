@@ -6,23 +6,23 @@
 
 ## 当前状态
 
-`1.0.0rc1` 是可安装的产品候选：Windows x64 便携包、配置校验、多来源有界运行、KIM 增量／微信明文缓存、TIM 完整导出的精确前缀去重、企微显式原生复制、跨平台查询、完整证据导出／Markdown 汇编、校验、备份恢复、内置四平台合成自检。详细操作见 [产品手册](docs/PRODUCT_GUIDE.md)。
+`1.0.0rc2` 新增微信当前加密库/WAL自动只读采集，取消所有采集源软件版本白名单。已有的产品能力：Windows x64 便携包、配置校验、多来源有界运行、KIM 增量／微信明文缓存、TIM 完整导出的精确前缀去重、企微显式原生复制、跨平台查询、完整证据导出／Markdown 汇编、校验、备份恢复、内置四平台合成自检。详细操作见 [产品手册](docs/PRODUCT_GUIDE.md)。
 
-**尚未通过完整成品验收**：微信加密客户端实时刷新、TIM／企微真实 UI 驱动校准、企微当前新版本兼容、24–72 小时无人值守。语义 UI 驱动代码已经实现但默认禁用；本机企微 5.0.11.6018 与已验收 5.0.10.6025 不同，保持版本拦截。RC 不等于这几项已完成；逐项状态见 [交付门槛](docs/RELEASE_GATES.json)。
+**微信/KIM已完成当前本地源三轮自动读取；四平台最终验收仍未全部通过**：TIM／企微需要真实 UI 校准与新到消息验证，长时间无人值守尚未运行。软件版本仅诊断，不设白名单；只有实际能力/身份/格式验证失败才停止。企微当前缺少语义消息控件，不是版本被禁止。见[实时采集说明](docs/LIVE_COLLECTION.md)和[交付门槛](docs/RELEASE_GATES.json)。
 
 | 来源 | 已验证的上游路线 | 本项目输入适配 | LLM 是否必需 |
 |---|---|---|---|
-| 微信 | 明确配置的已有明文 SQLite 分片；不解密、不提取密钥 | `wechat-sqlite` → `database-json`，或旧 JSONL | 否 |
+| 微信 | 当前加密库及已提交 WAL，只使用显式现有密钥；兼容旧明文分片 | `wechat-live` / `wechat-sqlite` → `database-json` | 否 |
 | KIM / OA | 精确绑定账号目录及群的当前原生 SQLite | `kim-sqlite` → `database-json`，或旧 JSONL | 否 |
 | TIM / QQ | 客户端官方 TXT 导出；严格追加序列可跨导出去重 | `tim-sequence-json` / `tim-txt` | 否 |
-| 企业微信 | 旧版已验收原生载荷；新复制有进程／版本／序列校验 | `wecom-native` / `wecom-json` | 否 |
+| 企业微信 | 旧版已验收原生载荷；新复制有进程／原生格式／序列校验；版本只记录 | `wecom-native` / `wecom-json` | 否 |
 | QCE 备选 | 已验证合成导出，真实登录未验收 | `qce-json` | 否 |
 
 **无前端不等于上游客户端无 GUI。** TIM 发起导出、企微定位和复制仍需要桌面。新增语义状态机需要准确的客户端控件校准；前序人工实验不能代替当前版本自动导航验收。常规查询永不触碰客户端。
 
 ## 安装
 
-Windows 便携包：整体解压发行页 `im-hub-1.0.0rc1-windows-x64.zip`，保留 `_internal` 和 `backend`，直接运行下列命令。此包自带 Python 运行时、Node 与固定 ChatLab 后端；不需要另装前端或运行 npm。
+Windows 便携包：整体解压发行页 `im-hub-1.0.0rc2-windows-x64.zip`，保留 `_internal` 和 `backend`，直接运行下列命令。此包自带 Python 运行时、Node 与固定 ChatLab 后端；不需要另装前端或运行 npm。
 
 ```powershell
 .\im-hub.exe --help

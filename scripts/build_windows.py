@@ -77,7 +77,7 @@ def main():
     python_license = Path(sys.base_prefix) / 'LICENSE.txt'
     if python_license.is_file(): shutil.copy2(python_license, legal / 'PYTHON-LICENSE.txt')
     python_dependencies = []
-    for name in ('pywin32', 'uiautomation', 'comtypes', 'pyinstaller'):
+    for name in ('pywin32', 'uiautomation', 'comtypes', 'pyinstaller', 'cryptography', 'cffi', 'pycparser'):
         distribution = importlib.metadata.distribution(name)
         copied = []
         for file in distribution.files or []:

@@ -48,6 +48,15 @@ def prepare_desktop_profile(base: Path, profile: dict) -> dict:
     return p
 
 
+def profile_fingerprint(p: dict) -> str:
+    # Client version changes do not rebind accounts, sources, or message identity.
+    scoped = {k: v for k, v in p.items() if k not in ('client_version', 'observed_client_version')}
+    if isinstance(scoped.get('desktop'), dict):
+        scoped['desktop'] = {k: v for k, v in scoped['desktop'].items()
+                             if k not in ('client_version', 'observed_client_version')}
+    return digest(scoped)
+
+
 def reconcile_tim(raw: bytes, p: dict, previous: list[str] | None) -> tuple[dict, list[str]]:
     try: parsed = parse_tim(raw, p['conversation_name'])
     except (ValueError, UnicodeError): raise IMError('TIM_EXPORT_PARSE_OR_GROUP_MISMATCH') from None
@@ -107,17 +116,22 @@ def collect_desktop(home: Path, base: Path, source_name: str, profile: dict, dry
     check_home(home)
     ui = p['transport'].endswith('-ui')
     if ui and not allow_ui: raise IMError('UI_CONSENT_REQUIRED')
-    key = digest(p)
+    key = profile_fingerprint(p)
     if dry_run:
         return {'configured_source': source_name, 'transport': p['transport'], 'dry_run': True, 'written': False,
-                'profile_valid': True, 'client_access_performed': False, 'requirements': ['reviewed_client_version_and_scope'] +
+                'profile_valid': True, 'client_access_performed': False, 'requirements': ['actual_client_identity_scope_and_payload_capabilities'] +
                 (['interactive_unlocked_desktop', 'no_simultaneous_user_input'] if ui else []), 'llm_calls': 0}
     with writer(home, lock_name='.desktop.lock'):
         con = sqlite3.connect(home / 'desktop.sqlite3'); con.row_factory = sqlite3.Row
         try:
             con.executescript(DDL)
             prior = con.execute('SELECT * FROM sources WHERE source_id=?', (source_name,)).fetchone()
-            if prior and prior['profile_sha256'] != key: raise IMError('DESKTOP_PROFILE_CHANGED_REBIND_REQUIRED')
+            if prior and prior['profile_sha256'] != key:
+                if prior['profile_sha256'] != digest(p):
+                    raise IMError('DESKTOP_PROFILE_CHANGED_REBIND_REQUIRED')
+                # Exact old profile migration: no identity or scope widening.
+                with con:
+                    con.execute('UPDATE sources SET profile_sha256=? WHERE source_id=?', (key, source_name))
             pending = con.execute("SELECT * FROM runs WHERE source_id=? AND status IN ('staged','import_failed') ORDER BY created_at", (source_name,)).fetchall()
             if len(pending) > 1: raise IMError('MULTIPLE_PENDING_DESKTOP_RUNS')
             if pending:

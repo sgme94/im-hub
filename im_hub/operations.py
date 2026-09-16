@@ -35,7 +35,7 @@ def config_check(config: Path) -> dict:
         if not isinstance(p.get('enabled'), bool):
             raise IMError('SOURCE_ENABLED_BOOLEAN_REQUIRED')
         kind = p.get('transport')
-        if kind in ('kim-sqlite', 'wechat-sqlite'):
+        if kind in ('kim-sqlite', 'wechat-sqlite', 'wechat-live'):
             prepare_profile(config.resolve().parent, p)
         elif kind in ('tim-export', 'tim-ui', 'wecom-clipboard', 'wecom-ui'):
             prepare_desktop_profile(config.resolve().parent, p)
@@ -76,7 +76,7 @@ def run_sources(home: Path, config: Path, sources=None, dry_run=False, allow_ui=
                 results.append({'source': name, 'status': 'needs_input', 'error': 'UI_CONSENT_REQUIRED'}); continue
             try:
                 args = {'dry_run': dry_run, 'allow_ui': allow_ui}
-                if reconcile and item['transport'] in ('kim-sqlite', 'wechat-sqlite'):
+                if reconcile and item['transport'] in ('kim-sqlite', 'wechat-sqlite', 'wechat-live'):
                     args['reconcile'] = True
                 out = fn(home, config, name, **args)
                 results.append({'source': name, 'status': 'ok', 'records': out.get('records'),

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "sources": {
+    "wechat-work": {
+      "enabled": false,
+      "transport": "wechat-live",
+      "adapter": "database-json",
+      "platform": "wechat",
+      "account_namespace": "operator-reviewed-account",
+      "conversation_id": "reviewed-group@chatroom",
+      "conversation_name": "已核对的工作群",
+      "source_epoch": "reviewed-database-generation",
+      "data_class": "real",
+      "account_directory": "C:/Private/WeChat/account/db_storage/message",
+      "existing_key_file": "C:/Private/existing-key-cache.json",
+      "key_policy": "existing-only",
+      "initial_since": "2026-09-01T00:00:00+08:00",
+      "timeout_seconds": 15,
+      "max_records": 20000,
+      "shards": [
+        {"id": "message-0", "path": "C:/Private/WeChat/account/db_storage/message/message_0.db", "key_id": "message/message_0.db"}
+      ]
+    }
+  }
+}

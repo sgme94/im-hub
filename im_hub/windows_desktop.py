@@ -11,7 +11,14 @@ from ctypes import wintypes
 from pathlib import Path
 from .common import IMError, MAX_BYTES, digest, now, read_blob
 
-CLIENTS = {'qq': ('tim.exe', '3.5.1.22171'), 'wecom': ('wxwork.exe', '5.0.10.6025')}
+# Executable identity is a source boundary; product version is telemetry only.
+CLIENTS = {'qq': 'tim.exe', 'wecom': 'wxwork.exe'}
+VERSION_POLICY = 'capability_probe_not_version_whitelist'
+
+
+def accepts_client(platform, identity):
+    return (platform in CLIENTS and isinstance(identity, tuple) and len(identity) == 2
+            and isinstance(identity[0], str) and identity[0].lower() == CLIENTS[platform])
 CONTROL_TYPES = {'ButtonControl', 'MenuItemControl', 'ListItemControl', 'TextControl', 'PaneControl',
                  'ListControl', 'EditControl', 'ComboBoxControl', 'WindowControl', 'TreeItemControl', 'CheckBoxControl'}
 NAV_NAMES = {'消息记录', '消息管理器', '导出消息记录', '导出消息记录...', '导出消息记录…',
@@ -33,8 +40,6 @@ def selector(value):
 def validate_profile(ui: dict, platform: str, conversation: str):
     if not isinstance(ui, dict) or ui.get('profile_reviewed') is not True or platform not in CLIENTS:
         raise IMError('REVIEWED_DESKTOP_PROFILE_REQUIRED')
-    if ui.get('client_version') != CLIENTS[platform][1]:
-        raise IMError('CLIENT_VERSION_NOT_REVIEWED')
     selector(ui.get('window')); selector(ui.get('conversation_header'))
     if ui['conversation_header'].get('name') != conversation:
         raise IMError('CONVERSATION_HEADER_EXACT_NAME_REQUIRED')
@@ -68,7 +73,8 @@ def validate_profile(ui: dict, platform: str, conversation: str):
         pages = ui.get('max_pages', 3)
         if isinstance(pages, bool) or not isinstance(pages, int) or not 1 <= pages <= 50:
             raise IMError('DESKTOP_PAGE_LIMIT')
-    return {'valid': True, 'platform': platform, 'real_ui_acceptance': 'required'}
+    return {'valid': True, 'platform': platform, 'real_ui_acceptance': 'required',
+            'version_policy': VERSION_POLICY, 'source_client_version_required': False}
 
 
 def clipboard_status() -> dict:
@@ -116,6 +122,7 @@ class NativeWindows:
         self.kernel.QueryFullProcessImageNameW.restype = wintypes.BOOL
         self.kernel.CloseHandle.argtypes = [wintypes.HANDLE]
         self.pid = None; self.last_input = None; self.deadline = None; self.a = None
+        self.client_version = None
 
     def process_identity(self, pid):
         # PROCESS_QUERY_LIMITED_INFORMATION: executable identity only. Never VM_READ.
@@ -127,9 +134,16 @@ class NativeWindows:
                 raise IMError('CLIENT_IDENTITY_UNAVAILABLE')
             path = Path(buf.value)
         finally: self.kernel.CloseHandle(handle)
-        info = self.api.GetFileVersionInfo(str(path), '\\')
-        ms, ls = info['FileVersionMS'], info['FileVersionLS']
-        return path.name.lower(), f'{ms >> 16}.{ms & 65535}.{ls >> 16}.{ls & 65535}'
+        version = None
+        try:
+            info = self.api.GetFileVersionInfo(str(path), '\\')
+            ms, ls = info['FileVersionMS'], info['FileVersionLS']
+            version = f'{ms >> 16}.{ms & 65535}.{ls >> 16}.{ls & 65535}'
+        except Exception:
+            # pywintypes.error is not an OSError. This isolated metadata probe is
+            # best effort; executable identity failures above still fail closed.
+            pass
+        return path.name.lower(), version
 
     def capture(self, after_sequence):
         if isinstance(after_sequence, bool) or not isinstance(after_sequence, int) or not 0 <= after_sequence <= 0xffffffff:
@@ -139,7 +153,8 @@ class NativeWindows:
         owner = self.clip.GetClipboardOwner()
         if not owner: raise IMError('CLIPBOARD_HAS_NO_OWNER')
         pid = self.proc.GetWindowThreadProcessId(owner)[1]
-        if self.process_identity(pid) != CLIENTS['wecom']: raise IMError('CLIPBOARD_OWNER_OR_VERSION_NOT_REVIEWED')
+        identity = self.process_identity(pid)
+        if not accepts_client('wecom', identity): raise IMError('CLIPBOARD_OWNER_NOT_WECOM')
         if self.pid is not None and pid != self.pid: raise IMError('CLIPBOARD_WRONG_CLIENT_INSTANCE')
         self.clip.OpenClipboard()
         try:
@@ -152,7 +167,8 @@ class NativeWindows:
             if self.clip.GetClipboardOwner() != owner or self.user.GetClipboardSequenceNumber() != seq:
                 raise IMError('CLIPBOARD_CHANGED_DURING_READ')
         finally: self.clip.CloseClipboard()
-        return blob, {'captured_at': now(), 'sequence': seq, 'client_version': CLIENTS['wecom'][1],
+        return blob, {'captured_at': now(), 'sequence': seq, 'client_version': identity[1],
+                      'version_policy': VERSION_POLICY,
                       'clipboard_owner_verified': True, 'process_memory_read': False, 'transport': 'wecom-clipboard'}
 
     def input_tick(self):
@@ -188,9 +204,11 @@ class NativeWindows:
             roots = [w for w in a.GetRootControl().GetChildren() if self.matches(w, ui['window'])]
             valid = []
             for w in roots:
-                if self.process_identity(w.ProcessId) == CLIENTS[platform]: valid.append(w)
+                identity = self.process_identity(w.ProcessId)
+                if accepts_client(platform, identity): valid.append((w, identity[1]))
             if len(valid) != 1: raise IMError('CLIENT_WINDOW_MISSING_OR_AMBIGUOUS')
-            self.root = valid[0]; self.pid = self.root.ProcessId; self.deadline = time.monotonic() + 120
+            self.root, self.client_version = valid[0]
+            self.pid = self.root.ProcessId; self.deadline = time.monotonic() + 120
             self.last_input = self.input_tick()
             if ((self.api.GetTickCount() - self.last_input) & 0xffffffff) < 1500:
                 raise IMError('USER_ACTIVE_RETRY_WHEN_IDLE')
@@ -317,5 +335,6 @@ def acquire_ui(profile: dict, folder: Path, driver=None):
         else:
             blobs = native.wecom_pages(ui)
     return blobs, {'transport': profile['transport'], 'captured_at': now(), 'ui_performed': True,
-                   'client_version': CLIENTS[platform][1], 'coverage': 'bounded_ui_selection',
+                   'client_version': getattr(native, 'client_version', None),
+                   'version_policy': VERSION_POLICY, 'coverage': 'bounded_ui_selection',
                    'history_complete': False, 'llm_calls': 0, 'source_epoch': profile['source_epoch']}

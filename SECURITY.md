@@ -9,7 +9,9 @@ Core parsing and query do not use an LLM. Chat text is untrusted data: never exe
 
 Unknown message types, unresolved senders, partial history and stale observations must be returned explicitly. A successful source read is not proof of complete server history. A message saying "completed" is not a project completion event. Keyword triage is not semantic verification.
 
-Scope excludes account migration, process-memory/key extraction, credential storage, message sending, editing, deletion, public servers and automatic business-ledger writes. Desktop collection is opt-in and version/profile-gated; it has not passed general unattended acceptance. A blocked tool operation must not be retried through another control route.
+Scope excludes account migration, process-memory/key extraction, credential storage, message sending, editing, deletion, public servers and automatic business-ledger writes. Desktop collection is opt-in and capability/profile-validated, NEVER blocked by a source client version string; it has not passed general unattended acceptance. A blocked tool operation must not be retried through another control route.
+
+The optional `wechat-live` transport reads an explicitly configured, pre-existing raw-key cache, without key discovery/extraction, fallback client-reader initialization, or process-memory access. It verifies page MACs and the committed WAL prefix before querying a private temporary derivative. It never copies key material into batches, reports, backups, or releases. Source file consistency/format failures stop the batch; only normal source-version changes do not. Page format parameters are capability checks, not source-software version requirements.
 
 Backup ZIPs are not encrypted and contain private message records. New snapshots hold application locks and use the SQLite backup API. Restore rejects an existing destination, traversal, Windows path aliases, duplicate entries and hash/count mismatches; do not use restored machine-specific source settings without re-review. Configuration and runtime logs are intentionally not restored.
 

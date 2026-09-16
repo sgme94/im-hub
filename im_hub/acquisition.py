@@ -76,7 +76,7 @@ def _finish(home, con, source_name, run, backend):
                         (manifest['source_fingerprint'], checkpoint, now(), source_name))
             con.execute("UPDATE runs SET status='committed',completed_at=?,error_code=NULL WHERE run_id=?", (now(), run['run_id']))
         return {**result, 'configured_source': source_name, 'run_id': run['run_id'],
-                'transport': manifest['transport'], 'client_access_performed': manifest['transport'] == 'kim-sqlite',
+                'transport': manifest['transport'], 'client_access_performed': manifest['transport'] in ('kim-sqlite', 'wechat-live'),
                 'client_refreshed': False, 'database_read_performed': True,
                 'local_scan_until': stamp(checkpoint), 'client_complete_through': None,
                 'llm_calls': 0, 'dry_run': False}
@@ -118,7 +118,11 @@ def collect_database(home: Path, base: Path, source_name: str, profile: dict,
 
     def read(old):
         start = bounds(old)
-        packet = read_database(p, start, end)
+        if p['transport'] == 'wechat-live':
+            from .wechat_live import read_live
+            packet = read_live(p, start, end, home)
+        else:
+            packet = read_database(p, start, end)
         fingerprint = packet['acquisition']['source_fingerprint']
         if old is not None and old['source_fingerprint'] is not None and old['source_fingerprint'] != fingerprint:
             raise IMError('SOURCE_IDENTITY_OR_SCHEMA_CHANGED_REBIND_REQUIRED')
@@ -184,6 +188,6 @@ def collect_database(home: Path, base: Path, source_name: str, profile: dict,
                 con.execute('INSERT INTO runs VALUES(?,?,?,?,?,?,?,?)', (run_id, source_name, 'staged', now(), None, digest(blob), canonical(manifest), None))
             run = con.execute('SELECT * FROM runs WHERE run_id=?', (run_id,)).fetchone()
             return {**_finish(home, con, source_name, run, backend), 'resumed_pending': False,
-                    'reconcile_requested': reconcile, 'cache_full_window_rescan': p['platform'] == 'wechat'}
+                    'reconcile_requested': reconcile, 'cache_full_window_rescan': p['transport'] == 'wechat-sqlite'}
         finally:
             con.close()

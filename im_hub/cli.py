@@ -174,9 +174,10 @@ def main(argv=None):
         elif a.command == 'doctor':
             data = {'version': __version__, 'backend': backend_info(), 'home_initialized': any((home / name).is_file() for name in ('im-hub.json','im-unified.json')),
                     'llm_required': False, 'frontend': False, 'new_live_collection_implemented': True,
-                    'live_database_platforms': ['kim'], 'plaintext_cache_platforms': ['wechat'],
+                    'live_database_platforms': ['kim', 'wechat'], 'plaintext_cache_platforms': ['wechat'],
+                    'source_client_version_required': False, 'source_version_policy': 'capability_probe_not_version_whitelist',
                     'automatic_ui': False, 'scheduler_enabled': False,
-                    'send_supported': False, 'source_modes': ['KIM native SQLite', 'WeChat plaintext SQLite cache', 'normalized-v2 file', 'TIM TXT file', 'WeCom native payload/enriched JSON', 'QCE JSON file']}
+                    'send_supported': False, 'source_modes': ['KIM native SQLite', 'WeChat authenticated encrypted DB/WAL (existing keys only)', 'WeChat plaintext SQLite cache', 'normalized-v2 file', 'TIM TXT file', 'WeCom native payload/enriched JSON', 'QCE JSON file']}
         elif a.command in ('sources', 'status', 'coverage'):
             data = source_status(home, a.platform, a.stream, a.include_synthetic, a.max_age_seconds)
         elif a.command == 'query':

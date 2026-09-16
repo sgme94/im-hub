@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0rc2",
+  "portable_selftest_passed": true,
+  "binary_mode": true,
+  "host_python_node_not_on_path": true,
+  "source_client_version_required": false,
+  "wechat_actual_encrypted_read": true,
+  "wechat_page_authentication_verified": true,
+  "wechat_new_records_this_check": 0,
+  "records_verified": 71,
+  "existing_key_file_used": true,
+  "new_key_extraction": false,
+  "four_platform_final_accepted": false,
+  "exe_sha256": "e3ec4b830dec779cd692ede7179a5df84db8a53f2a304b4f65c5b7b3785a1688"
+}

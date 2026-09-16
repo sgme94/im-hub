@@ -1,15 +1,15 @@
 {
-  "version": "1.0.0rc1",
+  "version": "1.0.0rc2",
   "delivery_kind": "installable_product_release_candidate",
   "full_user_goal_accepted": false,
   "mandatory_llm": false,
   "frontend": false,
   "core_implemented": ["profile_validation", "file_database_ingestion", "strict_TIM_prefix_reconciliation", "explicit_WeCom_copy_capture", "recoverable_import", "cross_platform_query", "complete_export", "evidence_report", "health_integrity", "backup_restore", "bounded_foreground_runs", "portable_selftest"],
   "gates": [
-    {"id":"wechat_live_refresh","status":"not_implemented","detail":"Only existing plaintext caches; encrypted-client refresh not performed."},
+    {"id":"wechat_live_refresh","status":"native_read_verified","detail":"Current encrypted DB and committed WAL read with an existing key cache; 62 real records, three passes. New events during the observation interval not seen."},
     {"id":"tim_ui_calibration","status":"not_live_accepted","detail":"Bounded semantic driver exists; current real export UI has not passed end-to-end acceptance."},
-    {"id":"wecom_current_version","status":"held","reviewed_version":"5.0.10.6025","observed_version":"5.0.11.6018","detail":"New version not whitelisted; real source validation requires an allowed client interaction."},
-    {"id":"wecom_ui_history","status":"not_live_accepted","detail":"UI controls did not expose a validated message tree; one window-activation test was blocked and not retried by another route."},
+    {"id":"source_version_policy","status":"passed","version_required":false,"detail":"No source version whitelist; version and missing version are diagnostic only. Process, scope, controls and native payload capabilities remain checked."},
+    {"id":"wecom_ui_history","status":"not_live_accepted","detail":"Current accessibility tree has only a window and two unnamed groups; message nodes are unavailable. Actual UI acceptance needs an idle interactive desktop, not a version whitelist."},
     {"id":"unattended_24_72h","status":"not_run","detail":"No schedule installed; bounded command tests do not prove unattended operation."},
     {"id":"attachments_and_edits","status":"partial","detail":"Unknown types/attachment bodies are retained as gaps; edits/retractions conflict rather than silently overwriting."}
   ]

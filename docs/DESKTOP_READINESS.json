@@ -1,0 +1,22 @@
+{
+  "observed_at": "2026-09-16T10:43:16.424864+00:00",
+  "source_version_policy": "capability_probe_not_version_whitelist",
+  "clients": [
+    {
+      "platform": "wecom",
+      "observed_version": "5.0.11.6018",
+      "executable_identity_passed": true,
+      "version_blocks_collection": false
+    },
+    {
+      "platform": "qq",
+      "observed_version": "3.5.1.22171",
+      "executable_identity_passed": true,
+      "version_blocks_collection": false
+    }
+  ],
+  "foreground_is_configured_IM": false,
+  "input_idle_milliseconds": 3344,
+  "ui_actions_performed": false,
+  "payload_compatibility_proved_by_this_probe": false
+}
