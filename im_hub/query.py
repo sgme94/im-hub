@@ -32,6 +32,9 @@ def source_status(home: Path, platform=None, stream=None, include_synthetic=Fals
             committed = [x for x in batches if x['status'] == 'committed']
             count = con.execute('SELECT count(*) FROM records WHERE stream_id=?', (sid,)).fetchone()[0]
             latest_observation = max((b['observed_at'] for b in committed), key=iso_epoch, default=None)
+            cache_observation = None
+            if committed and all(json.loads(b['manifest_json'])['coverage'].get('source_kind') == 'plaintext_cache' for b in committed):
+                cache_observation, latest_observation = latest_observation, None
             age = max(0, iso_epoch(now()) - iso_epoch(latest_observation)) if latest_observation else None
             freshness = 'unknown' if age is None or max_age is None else ('fresh' if age <= max_age else 'stale')
             summaries = [{'batch_id': b['batch_id'], 'observed_at': b['observed_at'],
@@ -39,6 +42,7 @@ def source_status(home: Path, platform=None, stream=None, include_synthetic=Fals
             items.append({'stream_id': sid, **{k: spec[k] for k in
                 ('platform', 'account_namespace', 'conversation_id', 'conversation_name', 'adapter', 'source_epoch', 'data_class', 'collection_mode')},
                 'stored_records': count, 'source_observed_at': latest_observation,
+                'cache_observed_at': cache_observation,
                 'freshness': freshness, 'freshness_age_seconds': round(age, 3) if age is not None else None,
                 'freshness_max_age_seconds': max_age, 'history_completeness': 'partial', 'complete_through': None,
                 'failed_or_pending_batches': sum(x['status'] != 'committed' for x in batches), 'batches': summaries})

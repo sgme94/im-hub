@@ -9,6 +9,7 @@ import sqlite3
 import subprocess
 import uuid
 from pathlib import Path
+from . import __version__
 from .adapters import normalize
 from .common import (ROOT, IMError, binding_spec, canonical, check_home, db_path, digest,
                      iso_epoch, load_json, now, read_blob, readonly, stream_key, write_new, writer)
@@ -67,7 +68,7 @@ def payload_for(spec: dict, rows: list[dict], observed_at: str) -> dict:
                          'accountName': r['sender_name'], 'timestamp': r['timestamp'],
                          'type': r['type'], 'content': r['text']})
     return {'chatlab': {'version': '0.0.2', 'exportedAt': int(iso_epoch(observed_at)),
-                       'generator': 'im-hub/0.2.0',
+                       'generator': 'im-hub/' + __version__,
                        'description': 'Local evidence projection; source identities and coverage are in the im-hub sidecar.'},
             'meta': {'name': spec['conversation_name'],
                      'platform': 'weixin' if spec['platform'] == 'wechat' else spec['platform'],
@@ -197,6 +198,9 @@ def ingest(home: Path, source: Path, spec: dict, observed_at: str, since=None, u
                             continue
                         metadata = {k: v for k, v in r.items() if k not in ('text', 'semantic_sha256')}
                         metadata.update({'batch_id': batch_id, 'source_sha256': raw_hash, 'source_observed_at': base['source_observed_at']})
+                        if r.get('source_kind') == 'plaintext_cache':
+                            metadata['cache_observed_at'] = base['source_observed_at']
+                            metadata['source_observed_at'] = None
                         con.execute('INSERT INTO records VALUES(?,?,?,?,?,?,?)',
                                     (r['message_key'], sid, r['semantic_sha256'], r['event_ms'], batch_id, canonical(metadata), revision))
                         added += 1

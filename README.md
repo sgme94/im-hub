@@ -6,14 +6,14 @@
 
 ## 当前状态
 
-`v0.2.0` 已实现已有文件/原生载荷解析、配置式文件采集、ChatLab 导入及回读、跨平台只读查询、覆盖/时效、证据导出和规则初筛。不是空仓库或仅有架构图。
+`v0.3.0` 新增 KIM 原生 SQLite 的可恢复增量采集、微信受控明文分片读取，以及采集状态/断点恢复。保留已有文件/原生载荷解析、ChatLab 导入回读、跨平台查询、覆盖时效、证据导出与规则初筛。
 
-**尚未交付**：自动启动客户端导出、TIM 多群导航、企微连续翻页全采、微信/KIM 实时数据库采集封装、无人值守调度、大模型语义分析。不要把文件采集命令当成已经完成的客户端实时采集器。
+**尚未交付**：微信加密客户端实时刷新、自动启动客户端导出、TIM 多群导航、企微连续翻页全采、无人值守调度、大模型语义分析。KIM 当前本地库可直接读取，微信只读已存在的明文缓存；两者都不证明服务端历史完整。
 
 | 来源 | 已验证的上游路线 | 本项目输入适配 | LLM 是否必需 |
 |---|---|---|---|
-| 微信 | 已有本地数据库只读结果 | `normalized-v2` JSONL | 否 |
-| KIM / OA | 已有原生 SQLite 只读结果 | `normalized-v2` JSONL | 否 |
+| 微信 | 明确配置的已有明文 SQLite 分片；不解密、不提取密钥 | `wechat-sqlite` → `database-json`，或旧 JSONL | 否 |
+| KIM / OA | 精确绑定账号目录及群的当前原生 SQLite | `kim-sqlite` → `database-json`，或旧 JSONL | 否 |
 | TIM / QQ | 客户端官方 TXT 导出 | `tim-txt` | 否 |
 | 企业微信 | 正常选中复制后的原生载荷 | `wecom-native` / `wecom-json` | 否 |
 | QCE 备选 | 已验证合成导出，真实登录未验收 | `qce-json` | 否 |
@@ -76,7 +76,20 @@ im-hub --home .local/state collect --config .local/demo/sources.json --source de
 im-hub --home .local/state query --include-synthetic --limit 50
 ```
 
-`collect` 目前只读取明确配置的已完成文件和 manifest。不会新登录或启动导出，不以文件修改时间冒充来源观察时间。合成数据默认排除在普通查询之外。
+`file` transport 只读取明确配置的已完成文件和 manifest。不会新登录或启动导出，不以文件修改时间冒充来源观察时间。合成数据默认排除在普通查询之外。
+
+### 数据库增量采集
+
+`kim-sqlite` 按重叠窗口读取当前本地消息，`wechat-sqlite` 重扫指定缓存窗口。来源连接只读、SQL 有执行期限，固定账号/会话/分片，超限或身份变化则失败。示例与恢复契约见 [数据库采集手册](docs/DATABASE_COLLECTION.md)。
+
+```powershell
+im-hub --home .local/database-state collect --config .local/sources.local.json --source kim-work --dry-run
+im-hub --home .local/database-state collect --config .local/sources.local.json --source kim-work
+im-hub --home .local/database-state collect --config .local/sources.local.json --source kim-work --reconcile
+im-hub --home .local/database-state collection-status --source kim-work
+```
+
+第一次使用新的 home 要先执行 `init`；真实配置保持本地。`--reconcile` 对配置起点之后的窗口重新对账，补回普通重叠增量可能遗漏的更早迟到消息。失败保留待恢复批次，下次优先完成原批次；只在消息导入并回读通过后推进本地扫描游标。
 
 已有数据也可通过 `ingest` 显式接入：
 
@@ -105,7 +118,7 @@ im-hub --home .local/state validate-candidates --input '<本地候选包路径>'
 
 消息身份按平台、账号、会话、来源代际隔离；同秒同文但不同来源身份不合并。WeCom 原始 ID/发送者语义仍可能为 provisional；原生载荷与解析 JSON 共用同一身份通道。
 
-`fresh/stale` 与 `complete/partial` 分开。重放旧文件不刷新观察时间。样本最大消息时间不等于完整采集水位；当前 `complete_through=null`。失败不伪装成“零消息”。
+`fresh/stale` 与 `complete/partial` 分开。重放旧文件不刷新观察时间；微信明文缓存上游时效未知，返回 `freshness=unknown` 与独立 `cache_observed_at`。KIM 的 fresh 仅说明刚读取本地库。样本最大消息时间及本地扫描游标均不等于完整采集水位；当前 `complete_through=null`。失败不伪装成“零消息”，采集错误另见 `collection-status`。
 
 分页游标绑定过滤条件和已提交版本；数据改变时明确要求重开查询，避免静默漏数。结果包含证据 ID、正文解析缺口、来源批次及覆盖状态。详情见 [架构与契约](docs/ARCHITECTURE.md)。
 
@@ -113,9 +126,10 @@ im-hub --home .local/state validate-candidates --input '<本地候选包路径>'
 
 ```powershell
 python -m unittest discover -s tests -v
+python scripts/check_database_smoke.py
 python scripts/check_legacy.py --home '<已有旧版消息库>'
 ```
 
-单元测试全部使用合成数据，默认不访问真实客户端。`check_legacy` 只读已有库、只输出脱敏计数，不复制聊天。新包支持显式查询旧版 `im-unified` 数据目录，但拒绝写入旧目录，避免影响历史证据。
+单元测试全部使用合成数据，默认不访问真实客户端。`check_database_smoke` 需要实际 ChatLab 后端，但使用临时合成数据库验证增量、跨分片身份与重放。`check_legacy` 只读已有库、只输出脱敏计数，不复制聊天。新包支持显式查询旧版 `im-unified` 数据目录，但拒绝写入旧目录，避免影响历史证据。当前验收见 [数据库采集验收](docs/ACCEPTANCE_DATABASE.json)，旧 `ACCEPTANCE.json` 保留为 v0.2.0 的历史记录。
 
 [施工计划](docs/ROADMAP.md) 区分已完成和待完成；[安全边界](SECURITY.md) 与 [依赖说明](THIRD_PARTY_NOTICES.md) 必须保留。仓库中不得提交聊天正文、截图、账号/群标识、凭据、SQLite 库或真实采集配置。

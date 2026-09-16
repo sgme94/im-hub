@@ -10,6 +10,7 @@ from . import __version__
 from .adapters import ADAPTERS, spec_for
 from .analysis import export_packet, validate_candidates
 from .collection import capabilities, collect
+from .acquisition import collection_status
 from .common import DEFAULT_HOME, IMError, initialize, iso_epoch
 from .query import query_messages, source_status
 from .store import backend_info, ingest
@@ -51,10 +52,14 @@ def build_parser():
     commands.add_parser('init', help='Create a dedicated private ChatLab/provenance home')
     commands.add_parser('doctor', help='Check pinned local dependency; never install or log in')
     commands.add_parser('capabilities', help='Report implemented and pending capabilities; no client access')
-    c = commands.add_parser('collect', help='Ingest one configured finished file and observation manifest; no client UI automation')
+    c = commands.add_parser('collect', help='Explicit configured file or read-only database acquisition; no client UI automation')
     c.add_argument('--config', required=True, type=Path)
     c.add_argument('--source', required=True)
     c.add_argument('--dry-run', action='store_true')
+    c.add_argument('--until', help='Database-only exclusive end time, with explicit timezone')
+    c.add_argument('--reconcile', action='store_true', help='Database-only full configured-window scan for older late arrivals')
+    cs = commands.add_parser('collection-status', help='Read acquisition checkpoints, pending runs and errors without collection')
+    cs.add_argument('--source')
     for name in ('sources', 'status', 'coverage'):
         filters(commands.add_parser(name, help='Read source coverage/freshness; no refresh'))
     for name in ('query', 'export', 'analyze'):
@@ -96,11 +101,15 @@ def main(argv=None):
         elif a.command == 'capabilities':
             data = capabilities()
         elif a.command == 'collect':
-            data = collect(home, a.config, a.source, a.dry_run)
+            data = collect(home, a.config, a.source, a.dry_run, until=a.until, reconcile=a.reconcile)
+        elif a.command == 'collection-status':
+            data = collection_status(home, a.source)
         elif a.command == 'doctor':
             data = {'version': __version__, 'backend': backend_info(), 'home_initialized': any((home / name).is_file() for name in ('im-hub.json','im-unified.json')),
-                    'llm_required': False, 'frontend': False, 'new_live_collection_implemented': False, 'automatic_ui': False, 'scheduler_enabled': False,
-                    'send_supported': False, 'source_modes': ['normalized-v2 file', 'TIM TXT file', 'WeCom native payload/enriched JSON', 'QCE JSON file']}
+                    'llm_required': False, 'frontend': False, 'new_live_collection_implemented': True,
+                    'live_database_platforms': ['kim'], 'plaintext_cache_platforms': ['wechat'],
+                    'automatic_ui': False, 'scheduler_enabled': False,
+                    'send_supported': False, 'source_modes': ['KIM native SQLite', 'WeChat plaintext SQLite cache', 'normalized-v2 file', 'TIM TXT file', 'WeCom native payload/enriched JSON', 'QCE JSON file']}
         elif a.command in ('sources', 'status', 'coverage'):
             data = source_status(home, a.platform, a.stream, a.include_synthetic, a.max_age_seconds)
         elif a.command == 'query':

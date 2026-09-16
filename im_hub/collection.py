@@ -1,4 +1,4 @@
-"""Explicit configured-file collection. No GUI, network, model or shell commands.
+"""Explicit configured file or read-only database collection. No GUI/model/shell.
 
 The source exporter must finish an immutable file and an observation manifest first.
 This module does NOT claim to navigate TIM or WeCom or refresh a client database.
@@ -16,9 +16,12 @@ def capabilities() -> dict:
         'cli': 'im-hub', 'frontend': False, 'llm_required': False,
         'llm_calls_in_core': 0, 'message_sending': False,
         'configured_file_collection': True, 'automatic_client_collection': False,
+        'configured_database_collection': True,
+        'live_database_readers': ['kim-sqlite'], 'plaintext_cache_readers': ['wechat-sqlite'],
+        'recoverable_acquisition_batches': True, 'collection_checkpoint_status': True,
         'platforms': {
-            'wechat': {'input': ['normalized-v2'], 'upstream': 'reviewed local database reader', 'upstream_ui_required': False},
-            'kim': {'input': ['normalized-v2'], 'upstream': 'reviewed read-only SQLite reader', 'upstream_ui_required': False},
+            'wechat': {'input': ['normalized-v2', 'database-json'], 'database_transport': 'wechat-sqlite', 'upstream': 'explicit already-plaintext cache; encrypted-client refresh not implemented', 'upstream_ui_required': False},
+            'kim': {'input': ['normalized-v2', 'database-json'], 'database_transport': 'kim-sqlite', 'upstream': 'live read-only native SQLite', 'upstream_ui_required': False},
             'qq': {'input': ['tim-txt', 'qce-json'], 'upstream': 'TIM official export; QCE real login not accepted', 'tim_export_ui_required': True},
             'wecom': {'input': ['wecom-native', 'wecom-json'], 'upstream': 'normal selected-message clipboard copy', 'upstream_ui_required': True},
         },
@@ -35,7 +38,7 @@ def _path(base: Path, value: object) -> Path:
     return (candidate if candidate.is_absolute() else base / candidate).resolve()
 
 
-def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=None) -> dict:
+def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=None, until=None, reconcile=False) -> dict:
     if not re.fullmatch(r'[A-Za-z0-9_.-]{1,80}', source_name):
         raise IMError('INVALID_SOURCE_NAME')
     config = config.resolve()
@@ -48,8 +51,13 @@ def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=N
     profile = sources[source_name]
     if not isinstance(profile, dict) or profile.get('enabled') is not True:
         raise IMError('SOURCE_NOT_ENABLED')
+    if profile.get('transport') in ('kim-sqlite', 'wechat-sqlite'):
+        from .acquisition import collect_database
+        return collect_database(home, config.parent, source_name, profile, dry_run, backend, until, reconcile)
     if profile.get('transport') != 'file':
         raise IMError('CLIENT_DRIVER_NOT_IMPLEMENTED')
+    if until is not None or reconcile:
+        raise IMError('DATABASE_ONLY_COLLECTION_OPTION')
     required = ('platform', 'adapter', 'account_namespace', 'conversation_id',
                 'conversation_name', 'source_epoch', 'data_class', 'input', 'manifest')
     if any(key not in profile for key in required):

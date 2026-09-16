@@ -1,0 +1,131 @@
+{
+  "version": "0.3.0",
+  "recorded_at": "2026-09-16T02:55:17.583887+00:00",
+  "scope": "bounded_database_collection_not_full_desktop_automation",
+  "synthetic_unit_tests": {
+    "run": 82,
+    "failures": 0,
+    "errors": 0,
+    "backend": "fake_for_units"
+  },
+  "actual_chatlab_synthetic_test": {
+    "ok": true,
+    "backend": "actual_chatlab_0.37.1",
+    "data": "synthetic_only",
+    "kim_initial_replay_increment_replay": [
+      1,
+      0,
+      1,
+      0
+    ],
+    "wechat_two_shards_initial_replay": [
+      2,
+      0
+    ],
+    "query_count": 4,
+    "same_second_same_text_preserved": true,
+    "checkpoints_committed": true,
+    "cache_freshness_unknown": true,
+    "llm_calls": 0,
+    "actual_client_access": false
+  },
+  "actual_database_source_acceptance": {
+    "accepted_at": "2026-09-16T02:55:06.680943+00:00",
+    "all_acquisition_checkpoints_committed": true,
+    "automatic_desktop_collection": false,
+    "client_complete_through": null,
+    "credentials_or_memory_accessed": false,
+    "kim_local_read_freshness": "fresh",
+    "llm_calls": 0,
+    "mymind_written": false,
+    "query_files_unchanged": true,
+    "query_pages_limit_7": 9,
+    "query_unique": true,
+    "queryable_partial_bodies": 18,
+    "real_sources": [
+      {
+        "client_refreshed": false,
+        "first_new": 0,
+        "native_global_id_verified": false,
+        "physical_roundtrip_verified": true,
+        "platform": "kim",
+        "records": 9,
+        "repeat_duplicates": 9,
+        "repeat_new": 0,
+        "server_history_complete": false,
+        "source_kind": "native_local_database"
+      },
+      {
+        "client_refreshed": false,
+        "first_new": 0,
+        "native_global_id_verified": false,
+        "physical_roundtrip_verified": true,
+        "platform": "wechat",
+        "records": 52,
+        "repeat_duplicates": 52,
+        "repeat_new": 0,
+        "server_history_complete": false,
+        "source_kind": "plaintext_cache"
+      }
+    ],
+    "scheduler_created": false,
+    "scope": "explicit_database_collection_via_installed_CLI",
+    "source_database_writes_performed": false,
+    "total_records": 61,
+    "ui_used": false,
+    "version": "0.3.0",
+    "wechat_freshness": "unknown",
+    "wechat_upstream_refresh_implemented": false
+  },
+  "legacy_read_only_acceptance": {
+    "ok": true,
+    "records": 92,
+    "by_platform": {
+      "wecom": 3,
+      "wechat": 52,
+      "qq": 28,
+      "kim": 9
+    },
+    "unique": true,
+    "files_unchanged": true,
+    "copied_messages": false,
+    "llm_calls": 0,
+    "client_access_performed": false
+  },
+  "code_sha256": {
+    "im_hub/__init__.py": "81fbe8eda9108363a0aa8ab568363921fc6630356a1e77460a82035964798580",
+    "im_hub/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "im_hub/acquisition.py": "311eecd31599b2b9c09a018d4b7b9bdce01b1ded8a1952255e74296b904e251d",
+    "im_hub/adapters.py": "7498097463e9988e9eeae24c21440eec90cb88ad44eb1d35058e9af63af0ebad",
+    "im_hub/analysis.py": "eca38311d817eb93f382bb3d4b0a60603f4ff6ac0304be42aed12ce944d10fbf",
+    "im_hub/cli.py": "9c8ff8e76e6634e7b4702b8cbf56573d7a36cd816df1030068118f5dad9ec41f",
+    "im_hub/codecs/__init__.py": "d0d298d8d4f10ae78493dfa76718e66c3b84ffcc9069b8f6745f61da96035806",
+    "im_hub/codecs/desktop.py": "498df7e15772eaf0a0ab938d5c971b8f2aa637bd876bc13f0b58b739deefb0e9",
+    "im_hub/codecs/qce.py": "acff41dd2c73e59b2f5f82bc0a6b9ea56eaf34b5ffadd87ea06178f1c2d0d83c",
+    "im_hub/codecs/wecom_wire.py": "8c231cc3c32b13ae4879e8ac242350d177096f4c950cd30a9297730ccb9bd78c",
+    "im_hub/collection.py": "fbbaafc18895cc2440dea23a8a4cef3fe6ece4a570454e274abdb3f7290e9c88",
+    "im_hub/common.py": "34deddfd2e6baad6e9845dac40e3490f604eaf46a7e47928dfcf1c2b1c5da811",
+    "im_hub/database_readers.py": "2e9b5bb23a7ba6278192c7d46cb8abac128a2bc157dd21a08998ca3487284fb2",
+    "im_hub/query.py": "95f8d1f2f8ab3650bdef9731689696ba56a38c05f9eb0d403b6cb16cc8b10e8c",
+    "im_hub/store.py": "b80617ee98184b3d3af73e27af70a61a6f3ee2cb0e48c5cea7fa88bee10c16a6",
+    "tests/test_collection.py": "a6b441911483c57a08e84b5dfd233c9e3bce5fd1ee1e142276c2e0513ef90fe9",
+    "tests/test_core.py": "f3b9687167fc95385c154fbb55285ae78e40857e08410db2fb9761b8ba9e38fc",
+    "tests/test_database_collection.py": "92b575cc83c6538030c5016c05f83e5444faf5ee30641e2a42a6efa25a9e43e8",
+    "scripts/check_database_smoke.py": "c9038d4d4f837df57317bc4f9fcf3a6a2e345f6fe7dbc4fefc255350fc82e9b7",
+    "scripts/check_legacy.py": "29faaec05388b4a2e0a007d8414ba35fdfff655702e1e7cfd3e230da9ecbca4a",
+    "scripts/make_demo.py": "4c3c7dd34b0bf51b86676e7fd81b7b959791e7d1d5d64544e1079e396ec2da66",
+    "pyproject.toml": "a0dc49a0d444a5c4f9971578d6e5d1389c691047113af6f29960d64ca935f1e6",
+    "im_hub/offline_guard.mjs": "26bbf8b3cdcb63b57387cca6cfae77147e43c3e727f0f1c66499d150ac83838e"
+  },
+  "reviewed_repository_files": 34,
+  "known_privacy_findings": [],
+  "local_config_and_databases_git_ignored": true,
+  "source_code_stable_during_tests": true,
+  "unattended_production_accepted": false,
+  "tim_automated_export_implemented": false,
+  "wecom_automated_history_implemented": false,
+  "wechat_encrypted_source_refresh_implemented": false,
+  "llm_calls_in_collection": 0,
+  "schedules_created": false,
+  "mymind_formal_state_written": false
+}

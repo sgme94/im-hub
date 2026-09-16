@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "sources": {
+    "kim-demo": {
+      "enabled": false,
+      "transport": "kim-sqlite",
+      "platform": "kim",
+      "adapter": "database-json",
+      "account_namespace": "synthetic-account",
+      "conversation_id": "123",
+      "conversation_name": "Synthetic group",
+      "source_epoch": "reviewed-generation-1",
+      "data_class": "synthetic",
+      "account_directory": "./synthetic-account",
+      "database": "./synthetic-account/user.db",
+      "expected_session_id": 456,
+      "initial_since": "2024-01-01T00:00:00+00:00",
+      "overlap_seconds": 3600,
+      "max_records": 10000,
+      "timeout_seconds": 8
+    },
+    "wechat-demo": {
+      "enabled": false,
+      "transport": "wechat-sqlite",
+      "platform": "wechat",
+      "adapter": "database-json",
+      "account_namespace": "synthetic-account",
+      "conversation_id": "synthetic@chatroom",
+      "conversation_name": "Synthetic group",
+      "source_epoch": "reviewed-generation-1",
+      "data_class": "synthetic",
+      "account_directory": "./synthetic-account",
+      "shards": [
+        {"id": "message-0", "path": "./synthetic-account/message_0.db"},
+        {"id": "message-1", "path": "./synthetic-account/message_1.db"}
+      ],
+      "initial_since": "2024-01-01T00:00:00+00:00",
+      "overlap_seconds": 3600,
+      "max_records": 10000,
+      "timeout_seconds": 8
+    }
+  }
+}

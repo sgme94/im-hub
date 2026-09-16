@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 import importlib
 from pathlib import Path
-from .common import IMError, MAX_RECORDS, canonical, digest, label, load_json, stamp, stream_key
+from .common import IMError, MAX_RECORDS, canonical, digest, iso_epoch, label, load_json, stamp, stream_key
 
-ADAPTERS = ('normalized-v2', 'tim-txt', 'wecom-json', 'wecom-native', 'qce-json')
+ADAPTERS = ('normalized-v2', 'database-json', 'tim-txt', 'wecom-json', 'wecom-native', 'qce-json')
 
 def existing_module(folder: str, module: str):
     reviewed = {
@@ -23,7 +23,7 @@ def spec_for(platform: str, account: str, conversation: str, name: str, adapter:
              epoch: str, data_class: str, binding=None, source_account=None) -> dict:
     if platform not in ('wechat', 'kim', 'wecom', 'qq') or adapter not in ADAPTERS:
         raise IMError('UNSUPPORTED_ADAPTER')
-    allowed = {'normalized-v2': ('wechat', 'kim'), 'tim-txt': ('qq',),
+    allowed = {'normalized-v2': ('wechat', 'kim'), 'database-json': ('wechat', 'kim'), 'tim-txt': ('qq',),
                'wecom-json': ('wecom',), 'wecom-native': ('wecom',), 'qce-json': ('qq',)}
     if platform not in allowed[adapter] or data_class not in ('real', 'synthetic'):
         raise IMError('ADAPTER_PLATFORM_MISMATCH')
@@ -35,7 +35,7 @@ def spec_for(platform: str, account: str, conversation: str, name: str, adapter:
             'conversation_id': label(conversation), 'conversation_name': label(name),
             'adapter': adapter, 'source_epoch': label(epoch), 'data_class': data_class,
             'binding': binding, 'source_account': source_account,
-            'collection_mode': 'existing_file_or_native_payload',
+            'collection_mode': 'explicit_database_snapshot' if adapter == 'database-json' else 'existing_file_or_native_payload',
             'adapter_version': '1', 'full_history_verified': False}
 
 def _record(spec, identity, quality, ts, text, kind, sender, sender_name, sender_verified,
@@ -75,15 +75,33 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
     adapter, platform = spec['adapter'], spec['platform']
     rows = []
     recognized = 0
-    if adapter == 'normalized-v2':
-        try:
-            source = [json.loads(line) for line in blob.decode('utf-8-sig').splitlines() if line.strip()]
-        except (ValueError, UnicodeError, RecursionError):
-            raise IMError('INVALID_NORMALIZED_JSONL') from None
-        if len(source) > MAX_RECORDS:
+    acquisition = None
+    if adapter in ('normalized-v2', 'database-json'):
+        if adapter == 'database-json':
+            envelope = load_json(blob)
+            keys = ('platform', 'account_namespace', 'conversation_id', 'conversation_name', 'source_epoch', 'data_class')
+            if not isinstance(envelope, dict) or envelope.get('schema') != 'im-hub-database/1' or envelope.get('binding') != {k: spec[k] for k in keys}:
+                raise IMError('DATABASE_ENVELOPE_BINDING_MISMATCH')
+            source = envelope.get('records')
+            acquisition = envelope.get('acquisition')
+            kind = 'plaintext_cache' if platform == 'wechat' else 'native_local_database'
+            transport = 'wechat-sqlite' if platform == 'wechat' else 'kim-sqlite'
+            if not isinstance(acquisition, dict) or acquisition.get('source_kind') != kind or acquisition.get('transport') != transport or acquisition.get('local_window_read_complete') is not True:
+                raise IMError('DATABASE_ACQUISITION_METADATA_INVALID')
+            iso_epoch(acquisition.get('observed_at'))
+            if acquisition.get('window_since') != since or acquisition.get('window_until_exclusive') != until:
+                raise IMError('DATABASE_ENVELOPE_WINDOW_MISMATCH')
+        else:
+            try:
+                source = [json.loads(line) for line in blob.decode('utf-8-sig').splitlines() if line.strip()]
+            except (ValueError, UnicodeError, RecursionError):
+                raise IMError('INVALID_NORMALIZED_JSONL') from None
+        if not isinstance(source, list) or len(source) > MAX_RECORDS:
             raise IMError('MESSAGE_COUNT_BOUND')
         selected = [r for r in source if isinstance(r, dict) and r.get('platform') == platform and str(r.get('group_id')) == spec['conversation_id']]
-        if not selected:
+        if acquisition is not None and len(selected) != len(source):
+            raise IMError('DATABASE_RECORD_OUTSIDE_BOUND_SOURCE')
+        if not selected and acquisition is None:
             raise IMError('CONVERSATION_NOT_PRESENT_IN_INPUT')
         for r in selected:
             if r.get('group_name') != spec['conversation_name']:
@@ -98,10 +116,22 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
                 sender = str(r.get('sender_id', 'unresolved'))
                 native = str(r['message_id']) if r.get('message_id') is not None else None
             flags = [] if r.get('body_available') is True and kind == 0 else ['nontext_or_body_not_fully_decoded']
+            extras = {'source_type': ty}
+            if acquisition is not None:
+                given_flags = r.get('content_flags', [])
+                given_extras = r.get('database_extras', {})
+                if not isinstance(given_flags, list) or any(not isinstance(f, str) for f in given_flags) or not isinstance(given_extras, dict):
+                    raise IMError('DATABASE_RECORD_METADATA_INVALID')
+                flags = sorted(set(flags + given_flags))
+                extras['database'] = given_extras
             rows.append(_record(spec, r['evidence_id'], 'local_source_ref_epoch_scoped', r['timestamp'], r.get('text'), kind,
                 sender, r.get('sender') or '未核实发送者', r.get('sender_verified') is True,
                 {'evidence_id': r['evidence_id'], 'source_shard': r.get('source_shard'), 'local_id': r.get('local_id')},
-                native_id=native, flags=flags, reply=r.get('reply_to'), extras={'source_type': ty}))
+                native_id=native, flags=flags, reply=r.get('reply_to'), extras=extras))
+            if acquisition is not None:
+                rows[-1]['source_kind'] = acquisition['source_kind']
+                rows[-1]['upstream_observed_at'] = None
+                rows[-1]['source_time_basis'] = 'cache_read_not_client_sync' if platform == 'wechat' else 'local_database_read_not_server_sync'
         recognized = len(selected)
     elif adapter == 'tim-txt':
         parser = existing_module('ui_boundary_20260915', 'desktop_readers')
@@ -164,6 +194,8 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
     if len({r['message_key'] for r in rows}) != len(rows):
         raise IMError('DUPLICATE_SOURCE_ID_WITHIN_BATCH')
     selected = [r for r in rows if (since is None or r['event_ms'] >= since * 1000) and (until is None or r['event_ms'] < until * 1000)]
+    if acquisition is not None and len(selected) != len(rows):
+        raise IMError('DATABASE_RECORD_OUTSIDE_DECLARED_WINDOW')
     selected.sort(key=lambda r: (r['event_ms'], r['message_key']))
     coverage = {'scope': 'sampled_history' if platform == 'wecom' else 'input_local_snapshot',
                 'source_records_recognized': recognized, 'selected_records': len(selected),
@@ -178,4 +210,12 @@ def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dic
         coverage['gaps'] += ['continuous_history_not_collected', 'native_id_and_sender_semantics_provisional']
     if adapter == 'qce-json':
         coverage['gaps'] += ['real_QQNT_login_and_history_not_accepted_in_20260915_experiment']
+    if acquisition is not None:
+        coverage.update({'scope': 'configured_local_database_window', 'source_kind': acquisition['source_kind'],
+                         'transport': acquisition['transport'], 'local_window_read_complete': True,
+                         'snapshot_consistency': 'per_database_read_transaction', 'atomic_across_databases': False,
+                         'database_count': acquisition.get('database_count'), 'client_sync_verified': False,
+                         'upstream_observed_at': None})
+        if acquisition['source_kind'] == 'plaintext_cache':
+            coverage['gaps'] += ['upstream_cache_refresh_time_unknown', 'encrypted_client_refresh_not_implemented']
     return selected, coverage

@@ -132,11 +132,13 @@ def initialize(home: Path) -> dict:
     return {'initialized': True, 'already_exists': False, 'raw_data_public': False}
 
 @contextmanager
-def writer(home: Path):
+def writer(home: Path, lock_name: str = '.writer.lock'):
     check_home(home)
     if not (home / 'im-hub.json').is_file():
         raise IMError('LEGACY_HOME_READ_ONLY_USE_NEW_HOME_FOR_WRITES')
-    f = (home / '.writer.lock').open('a+b')
+    if lock_name not in ('.writer.lock', '.collection.lock'):
+        raise IMError('INVALID_INTERNAL_LOCK')
+    f = (home / lock_name).open('a+b')
     locked = False
     try:
         f.seek(0, 2)
