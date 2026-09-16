@@ -1,0 +1,88 @@
+{
+  "recorded_at": "2026-09-16T02:29:53.703207+00:00",
+  "version": "0.2.0",
+  "cli": "im-hub",
+  "frontend": false,
+  "mandatory_llm": false,
+  "unit_tests": {
+    "tests_run": 48,
+    "failures": 0,
+    "errors": 0,
+    "passed": true,
+    "backend": "fake_synthetic_unit_tests"
+  },
+  "installed_cli_real_backend_test": {
+    "ok": true,
+    "backend": "actual_installed_chatlab_0.37.1",
+    "cli": "installed_im-hub.exe",
+    "data": "synthetic_only",
+    "initial_new": 2,
+    "replay_new": 0,
+    "replay_duplicates": 2,
+    "default_query_count": 0,
+    "explicit_synthetic_query_count": 2,
+    "dry_run_writes": false,
+    "utf8_pipeline_verified": true,
+    "llm_calls": 0,
+    "client_access_performed": false,
+    "frontend_started": false
+  },
+  "legacy_readonly_test": {
+    "ok": true,
+    "records": 92,
+    "by_platform": {
+      "wecom": 3,
+      "wechat": 52,
+      "qq": 28,
+      "kim": 9
+    },
+    "unique": true,
+    "files_unchanged": true,
+    "copied_messages": false,
+    "llm_calls": 0,
+    "client_access_performed": false
+  },
+  "privacy_review": {
+    "known_real_identifiers_found": false,
+    "private_state_and_local_config_git_ignored": true,
+    "real_chat_files_copied_to_repository": false
+  },
+  "new_live_client_collection": false,
+  "automatic_ui_driver": false,
+  "semantic_llm_analysis_implemented": false,
+  "mymind_written": false,
+  "schedule_created": false,
+  "corrections_during_acceptance": [
+    "Windows console entry now forces UTF-8 for JSON pipes",
+    "Legacy export/analyze writes are rejected as well as ingestion"
+  ],
+  "source_files_sha256": {
+    "README.md": "764619fb846865de756f7c9b64d900cde42709e8c6364cc023092a6e34deebd8",
+    "AGENTS.md": "8559ae0a4baff9838195f3aff417965609de2d35b0615846516958a9be77cfd1",
+    "SECURITY.md": "44c3669a461b5d5527136802a2c08c672cc0065047dcafd59c11a90dba897d40",
+    "THIRD_PARTY_NOTICES.md": "1caeae8ab06e1d4d66eb56bbdc58a4a0c87ac87a8bdc15cc368930ff206e2354",
+    "pyproject.toml": "756c5cedc62954c360313abbc1d9db62cd5f116501c7842a34632c6e50c7d555",
+    ".gitignore": "d155d35724e6edae31fb32b691437b002a1d1babf49280231f68b60e6bf105ad",
+    "im_hub/adapters.py": "649a83ac5bd6dcfb9b0c87995a9dc834958cae0f69e96d4933987522215f9207",
+    "im_hub/analysis.py": "eca38311d817eb93f382bb3d4b0a60603f4ff6ac0304be42aed12ce944d10fbf",
+    "im_hub/cli.py": "edfe32466949f4e4825cf9cc3911ed399eeaee80ddfec6821e5333fd5bf80eeb",
+    "im_hub/collection.py": "13352c3c31daaf4290309a962d52f03a4267bf25543ebf5468ad0d30ecc428e2",
+    "im_hub/common.py": "c1f275943c7fd2c980f3c00ec3a1dfed70030b66aba8dd9d78271e29ac5314e7",
+    "im_hub/offline_guard.mjs": "26bbf8b3cdcb63b57387cca6cfae77147e43c3e727f0f1c66499d150ac83838e",
+    "im_hub/query.py": "ac4b155c904597ae6d4eaf2ec910e7ace8fe476c8fe45411f44c5b3d770b4665",
+    "im_hub/store.py": "9e2c68df75219b037b47a7d70a298ea17c5ce1049029a346250106ec92375f8f",
+    "im_hub/__init__.py": "87fab31ea646c6c18a49bf0cdae0e2658e04290b7e1c02049b7c4c6f559f8091",
+    "im_hub/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "im_hub/codecs/desktop.py": "498df7e15772eaf0a0ab938d5c971b8f2aa637bd876bc13f0b58b739deefb0e9",
+    "im_hub/codecs/qce.py": "acff41dd2c73e59b2f5f82bc0a6b9ea56eaf34b5ffadd87ea06178f1c2d0d83c",
+    "im_hub/codecs/wecom_wire.py": "8c231cc3c32b13ae4879e8ac242350d177096f4c950cd30a9297730ccb9bd78c",
+    "im_hub/codecs/__init__.py": "d0d298d8d4f10ae78493dfa76718e66c3b84ffcc9069b8f6745f61da96035806",
+    "tests/test_collection.py": "a6b441911483c57a08e84b5dfd233c9e3bce5fd1ee1e142276c2e0513ef90fe9",
+    "tests/test_core.py": "f3b9687167fc95385c154fbb55285ae78e40857e08410db2fb9761b8ba9e38fc",
+    "scripts/check_legacy.py": "29faaec05388b4a2e0a007d8414ba35fdfff655702e1e7cfd3e230da9ecbca4a",
+    "scripts/make_demo.py": "4c3c7dd34b0bf51b86676e7fd81b7b959791e7d1d5d64544e1079e396ec2da66",
+    "docs/ARCHITECTURE.md": "687f91e55f02839132d339695ddf9d06aeb2a26cdfa3cfbc1c6cebb19c9dbcbd",
+    "docs/ROADMAP.md": "2ed6502a880c1d6a072afc52ba567de477a9f5c745e3b7d64f00102f3a774c28",
+    "examples/sources.json": "6e2e2204fee8d2f24431a4880884db05626d8566d02afc0e11bcc73b56bc0635"
+  }
+}

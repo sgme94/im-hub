@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "im-hub"
+version = "0.2.0"
+description = "CLI-only local IM collection, query and evidence hub; no mandatory LLM."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+im-hub = "im_hub.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["im_hub*"]
+
+[tool.setuptools.package-data]
+im_hub = ["offline_guard.mjs"]

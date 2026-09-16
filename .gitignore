@@ -1,0 +1,39 @@
+# Private inputs, state, configuration, runtime logs and local migration helpers
+.local/
+private/
+data/
+state/
+exports/
+candidates/
+*.local.json
+*.local.toml
+.env
+.env.*
+!.env.example
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.bin
+*.log
+*.pem
+*.key
+# Python / build
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+# Optional ChatLab dependency
+node_modules/
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

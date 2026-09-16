@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "sources": {
+    "demo-tim": {
+      "enabled": false,
+      "transport": "file",
+      "platform": "qq",
+      "adapter": "tim-txt",
+      "account_namespace": "demo-account",
+      "conversation_id": "demo-group",
+      "conversation_name": "测试群",
+      "source_epoch": "demo-generation",
+      "data_class": "synthetic",
+      "input": "tim.txt",
+      "manifest": "tim.meta.json"
+    }
+  }
+}
