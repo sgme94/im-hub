@@ -1,0 +1,186 @@
+{
+  "recorded_at": "2026-09-16T07:26:56.008098+00:00",
+  "version": "1.0.0rc1",
+  "release_channel": "candidate",
+  "full_four_platform_unattended_goal_accepted": false,
+  "synthetic_regression": {
+    "tests": 127,
+    "failures": 0,
+    "errors": 0
+  },
+  "portable": {
+    "portable_executable": true,
+    "host_python_or_node_on_PATH": false,
+    "unrelated_unicode_working_directory": true,
+    "version": "1.0.0rc1",
+    "doctor": {
+      "version": "1.0.0rc1",
+      "backend": {
+        "installed_version": "0.37.1",
+        "required_version": "0.37.1",
+        "node_available": true,
+        "offline_guard_available": true,
+        "ready": true
+      },
+      "home_initialized": false,
+      "llm_required": false,
+      "frontend": false,
+      "new_live_collection_implemented": true,
+      "live_database_platforms": [
+        "kim"
+      ],
+      "plaintext_cache_platforms": [
+        "wechat"
+      ],
+      "automatic_ui": false,
+      "scheduler_enabled": false,
+      "send_supported": false,
+      "source_modes": [
+        "KIM native SQLite",
+        "WeChat plaintext SQLite cache",
+        "normalized-v2 file",
+        "TIM TXT file",
+        "WeCom native payload/enriched JSON",
+        "QCE JSON file"
+      ]
+    },
+    "selftest": {
+      "passed": true,
+      "backend": "actual_chatlab_0.37.1",
+      "records": 7,
+      "platforms": [
+        {
+          "platform": "kim",
+          "initial_replay_increment": [
+            1,
+            0,
+            1
+          ]
+        },
+        {
+          "platform": "wechat",
+          "initial_replay": [
+            2,
+            0
+          ]
+        },
+        {
+          "platform": "qq",
+          "initial_replay_increment": [
+            1,
+            0,
+            1
+          ]
+        },
+        {
+          "platform": "wecom",
+          "initial_replay": [
+            1,
+            0
+          ]
+        }
+      ],
+      "binary_mode": true,
+      "backup_restore_verified": true,
+      "complete_export_verified": true,
+      "real_clients_accessed": false,
+      "synthetic_only": true,
+      "llm_calls": 0,
+      "ui_used": false,
+      "network_used": false
+    },
+    "exe_sha256": "680c0ad1fb2898d58d64fdc2b070436e518fade518e3ed3dc9df160e5ab71ade"
+  },
+  "four_source_real_readback": {
+    "accepted_at": "2026-09-16T07:25:04.681768+00:00",
+    "version": "1.0.0rc1",
+    "binary_execution": true,
+    "host_python_node_required": false,
+    "real_records": 92,
+    "sources": [
+      {
+        "platform": "kim",
+        "source_kind": "current_native_local_database",
+        "records": 9,
+        "initial_new": 9,
+        "replay_new": 0,
+        "duplicates": 9
+      },
+      {
+        "platform": "wechat",
+        "source_kind": "existing_plaintext_cache",
+        "records": 52,
+        "initial_new": 52,
+        "replay_new": 0,
+        "duplicates": 52
+      },
+      {
+        "platform": "qq",
+        "source_kind": "previous_real_export",
+        "records": 28,
+        "initial_new": 28,
+        "replay_new": 0,
+        "duplicates": 28
+      },
+      {
+        "platform": "wecom",
+        "source_kind": "previous_real_export",
+        "records": 3,
+        "initial_new": 3,
+        "replay_new": 0,
+        "duplicates": 3
+      }
+    ],
+    "backup_restore_real_records": 92,
+    "complete_export": true,
+    "report_has_source_references": true,
+    "query_state_unchanged": true,
+    "ui_performed": false,
+    "new_live_TIM_WeCom_samples": false,
+    "current_WeCom_version_accepted": false,
+    "wechat_encrypted_refresh": false,
+    "llm_calls": 0,
+    "mymind_written": false,
+    "health_status": "degraded",
+    "source_history_complete": false
+  },
+  "source_code_sha256": {
+    "im_hub/acquisition.py": "311eecd31599b2b9c09a018d4b7b9bdce01b1ded8a1952255e74296b904e251d",
+    "im_hub/adapters.py": "148b894db8c4cba930a84a91d06ac71ea7602c38b360bdbc192df5a14dd4297a",
+    "im_hub/analysis.py": "eca38311d817eb93f382bb3d4b0a60603f4ff6ac0304be42aed12ce944d10fbf",
+    "im_hub/cli.py": "c250efb863be1e5aa6e5e412247f99b64611b6ce264d719903af50409db1db4e",
+    "im_hub/collection.py": "2623b09f58d3418a7a053b46af888c3a195484591d7c5cdb217d7e7ca43846ce",
+    "im_hub/common.py": "6878067b848aaecccdb318c8d8e5b52af942ae7b5018dbb46c77c0b782b483c9",
+    "im_hub/database_readers.py": "2e9b5bb23a7ba6278192c7d46cb8abac128a2bc157dd21a08998ca3487284fb2",
+    "im_hub/desktop_sources.py": "343ce013d948a56c4a0b85a634ee82a69d7100c62071a7cbdddc93dec1fbd754",
+    "im_hub/operations.py": "7ce3b20d64a8cf0ae05c7b79c9aea8636b34fe3843384397e22b73f7ddfed54f",
+    "im_hub/query.py": "95f8d1f2f8ab3650bdef9731689696ba56a38c05f9eb0d403b6cb16cc8b10e8c",
+    "im_hub/selftest.py": "d356c8135bc1b1f8a85e2a66f7474d11dcf2be6c2c5ca0f792dba36814735fbf",
+    "im_hub/store.py": "6b0b265297acc8a8f8288b1417b2e3b9da874717fa2dd8e48f748743630dfc04",
+    "im_hub/tim_sequence.py": "35c86a8972c34f094e7eb096f64208de93b81f14cfc1ca9dc5e5c97c7f017e5e",
+    "im_hub/windows_desktop.py": "5c534c5fea7ce9b3bf31fb47f68bf19b4fa9c4fc3484a300d4a0040a1b702159",
+    "im_hub/__init__.py": "a704c7a4ac11c6f439361c8a54a9f8423b539d452bed17e62f381edd635b27f1",
+    "im_hub/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "im_hub/codecs/desktop.py": "498df7e15772eaf0a0ab938d5c971b8f2aa637bd876bc13f0b58b739deefb0e9",
+    "im_hub/codecs/qce.py": "acff41dd2c73e59b2f5f82bc0a6b9ea56eaf34b5ffadd87ea06178f1c2d0d83c",
+    "im_hub/codecs/wecom_wire.py": "8c231cc3c32b13ae4879e8ac242350d177096f4c950cd30a9297730ccb9bd78c",
+    "im_hub/codecs/__init__.py": "d0d298d8d4f10ae78493dfa76718e66c3b84ffcc9069b8f6745f61da96035806",
+    "tests/test_collection.py": "894bfc8360857cd9004fc2635c586327a6e70cf680b2bac6258dcd0fc508cc84",
+    "tests/test_core.py": "f3b9687167fc95385c154fbb55285ae78e40857e08410db2fb9761b8ba9e38fc",
+    "tests/test_database_collection.py": "92b575cc83c6538030c5016c05f83e5444faf5ee30641e2a42a6efa25a9e43e8",
+    "tests/test_product.py": "b77d11ede29bc72cf1d5668fd65d9a13749073eb85f52f3fce930d2b7f79e75e",
+    "scripts/build_windows.py": "b8117b32782e5d075db32872efe4911b0086b3b349691febdae0e53dfaf95746",
+    "scripts/check_database_smoke.py": "c9038d4d4f837df57317bc4f9fcf3a6a2e345f6fe7dbc4fefc255350fc82e9b7",
+    "scripts/check_legacy.py": "29faaec05388b4a2e0a007d8414ba35fdfff655702e1e7cfd3e230da9ecbca4a",
+    "scripts/frozen_entry.py": "e3b9549d68e9701c7972d42a8d07b4c3014f0fa7d65b02363ab9d06a4cfcfeb6",
+    "scripts/make_demo.py": "4c3c7dd34b0bf51b86676e7fd81b7b959791e7d1d5d64544e1079e396ec2da66",
+    "pyproject.toml": "1b375ffa873616676932b8704bcf06ba9e4abd41cefc46d3d05bf2f2c11bb6cb",
+    "im_hub/offline_guard.mjs": "26bbf8b3cdcb63b57387cca6cfae77147e43c3e727f0f1c66499d150ac83838e"
+  },
+  "private_data_scan_findings": [],
+  "font_files_in_bundle": 0,
+  "no_frontend": true,
+  "llm_calls_in_core": 0,
+  "limitations_file": "docs/RELEASE_GATES.json",
+  "initial_acceptance_test_correction": "A repeated KIM overlap window contained zero records; full replay verification was rerun explicitly with --reconcile. Prior evidence retained locally."
+}

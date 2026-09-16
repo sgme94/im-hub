@@ -6,21 +6,31 @@
 
 ## 当前状态
 
-`v0.3.0` 新增 KIM 原生 SQLite 的可恢复增量采集、微信受控明文分片读取，以及采集状态/断点恢复。保留已有文件/原生载荷解析、ChatLab 导入回读、跨平台查询、覆盖时效、证据导出与规则初筛。
+`1.0.0rc1` 是可安装的产品候选：Windows x64 便携包、配置校验、多来源有界运行、KIM 增量／微信明文缓存、TIM 完整导出的精确前缀去重、企微显式原生复制、跨平台查询、完整证据导出／Markdown 汇编、校验、备份恢复、内置四平台合成自检。详细操作见 [产品手册](docs/PRODUCT_GUIDE.md)。
 
-**尚未交付**：微信加密客户端实时刷新、自动启动客户端导出、TIM 多群导航、企微连续翻页全采、无人值守调度、大模型语义分析。KIM 当前本地库可直接读取，微信只读已存在的明文缓存；两者都不证明服务端历史完整。
+**尚未通过完整成品验收**：微信加密客户端实时刷新、TIM／企微真实 UI 驱动校准、企微当前新版本兼容、24–72 小时无人值守。语义 UI 驱动代码已经实现但默认禁用；本机企微 5.0.11.6018 与已验收 5.0.10.6025 不同，保持版本拦截。RC 不等于这几项已完成；逐项状态见 [交付门槛](docs/RELEASE_GATES.json)。
 
 | 来源 | 已验证的上游路线 | 本项目输入适配 | LLM 是否必需 |
 |---|---|---|---|
 | 微信 | 明确配置的已有明文 SQLite 分片；不解密、不提取密钥 | `wechat-sqlite` → `database-json`，或旧 JSONL | 否 |
 | KIM / OA | 精确绑定账号目录及群的当前原生 SQLite | `kim-sqlite` → `database-json`，或旧 JSONL | 否 |
-| TIM / QQ | 客户端官方 TXT 导出 | `tim-txt` | 否 |
-| 企业微信 | 正常选中复制后的原生载荷 | `wecom-native` / `wecom-json` | 否 |
+| TIM / QQ | 客户端官方 TXT 导出；严格追加序列可跨导出去重 | `tim-sequence-json` / `tim-txt` | 否 |
+| 企业微信 | 旧版已验收原生载荷；新复制有进程／版本／序列校验 | `wecom-native` / `wecom-json` | 否 |
 | QCE 备选 | 已验证合成导出，真实登录未验收 | `qce-json` | 否 |
 
-**无前端不等于上游客户端无 GUI。** TIM 发起导出、企微定位和复制仍需要桌面；计划使用确定性状态机/UI 自动化，不把 LLM 作为采集依赖。前序实验中的人工/Agent 视觉观察还没有全部固化成长期稳定的自动导航器。
+**无前端不等于上游客户端无 GUI。** TIM 发起导出、企微定位和复制仍需要桌面。新增语义状态机需要准确的客户端控件校准；前序人工实验不能代替当前版本自动导航验收。常规查询永不触碰客户端。
 
 ## 安装
+
+Windows 便携包：整体解压发行页 `im-hub-1.0.0rc1-windows-x64.zip`，保留 `_internal` 和 `backend`，直接运行下列命令。此包自带 Python 运行时、Node 与固定 ChatLab 后端；不需要另装前端或运行 npm。
+
+```powershell
+.\im-hub.exe --help
+.\im-hub.exe doctor
+.\im-hub.exe selftest
+```
+
+便携 EXE 未签名，使用前核对发行 SHA256，不关闭系统安全保护。以下为源码安装方式：
 
 Python 3.11+。建议独立虚拟环境，不修改其他项目环境：
 
@@ -32,7 +42,7 @@ py -3 -m venv .venv
 
 激活虚拟环境后可直接调用 `im-hub`，也支持 `python -m im_hub`。Python 核心包无运行时第三方依赖。安装不会注册服务、创建定时任务、启动聊天客户端或安装前端。
 
-新消息导入需要另行安装固定的 ChatLab CLI 0.37.1 和 Node。本地已有安装可以复用：
+仅源码／wheel 安装方式需要另行准备固定的 ChatLab CLI 0.37.1 和 Node。本地已有安装可以复用：
 
 ```powershell
 $env:IM_HUB_CHATLAB_DIR = 'C:\path\to\node_modules\chatlab-cli'
@@ -103,6 +113,21 @@ im-hub --home .local/state ingest --adapter tim-txt --platform qq `
 不同 TIM 导出缺乏已验证的全局消息身份，默认拒绝自动混入第二个快照；显式 `--allow-new-snapshot` 只表示接受可能保留重复，不能称为已解决跨导出去重。
 
 ### 分析入口
+
+产品级入口支持完整分页导出、报告、运维与恢复：
+
+```powershell
+im-hub config-check --config .local/sources.local.json
+im-hub --home .local/state run --config .local/sources.local.json
+im-hub --home .local/state export-all '迁移' --max-records 10000
+im-hub --home .local/state report '迁移' --max-records 10000
+im-hub --home .local/state verify
+im-hub --home .local/state health
+im-hub --home .local/state backup --output 'D:/Backups/im-hub-snapshot.zip'
+im-hub restore --input 'D:/Backups/im-hub-snapshot.zip' --destination 'D:/IMHub-Restored'
+```
+
+备份输出与恢复目标必须是新路径；备份是含敏感消息的**未加密**私有 ZIP。配置不随备份恢复。`run --cycles 3 --interval 60` 仅在当前进程运行三轮，不安装定时任务；部分失败返回退出码 4。具体恢复和桌面采集条件见产品手册。
 
 ```powershell
 im-hub --home .local/state export '迁移' --limit 200 --full

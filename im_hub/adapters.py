@@ -7,7 +7,7 @@ import importlib
 from pathlib import Path
 from .common import IMError, MAX_RECORDS, canonical, digest, iso_epoch, label, load_json, stamp, stream_key
 
-ADAPTERS = ('normalized-v2', 'database-json', 'tim-txt', 'wecom-json', 'wecom-native', 'qce-json')
+ADAPTERS = ('normalized-v2', 'database-json', 'tim-txt', 'tim-sequence-json', 'wecom-json', 'wecom-native', 'qce-json')
 
 def existing_module(folder: str, module: str):
     reviewed = {
@@ -23,7 +23,7 @@ def spec_for(platform: str, account: str, conversation: str, name: str, adapter:
              epoch: str, data_class: str, binding=None, source_account=None) -> dict:
     if platform not in ('wechat', 'kim', 'wecom', 'qq') or adapter not in ADAPTERS:
         raise IMError('UNSUPPORTED_ADAPTER')
-    allowed = {'normalized-v2': ('wechat', 'kim'), 'database-json': ('wechat', 'kim'), 'tim-txt': ('qq',),
+    allowed = {'normalized-v2': ('wechat', 'kim'), 'database-json': ('wechat', 'kim'), 'tim-txt': ('qq',), 'tim-sequence-json': ('qq',),
                'wecom-json': ('wecom',), 'wecom-native': ('wecom',), 'qce-json': ('qq',)}
     if platform not in allowed[adapter] or data_class not in ('real', 'synthetic'):
         raise IMError('ADAPTER_PLATFORM_MISMATCH')
@@ -73,6 +73,9 @@ def _record(spec, identity, quality, ts, text, kind, sender, sender_name, sender
 
 def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dict], dict]:
     adapter, platform = spec['adapter'], spec['platform']
+    if adapter == 'tim-sequence-json':
+        from .tim_sequence import normalize_sequence
+        return normalize_sequence(blob, spec, since, until)
     rows = []
     recognized = 0
     acquisition = None

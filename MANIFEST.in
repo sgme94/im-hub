@@ -1,0 +1,12 @@
+include README.md SECURITY.md THIRD_PARTY_NOTICES.md
+recursive-include im_hub *.py *.mjs
+recursive-include tests *.py
+recursive-include scripts *.py *.ps1
+recursive-include docs *.md *.json
+recursive-include examples *.json
+prune .local
+prune .venv
+prune build
+prune dist
+prune node_modules
+global-exclude __pycache__ *.pyc *.db *.sqlite3 *.bin *.key *.pem .env

@@ -95,7 +95,8 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(status, 0)
         self.assertFalse(result['data']['llm_required'])
         self.assertFalse(result['data']['frontend'])
-        self.assertFalse(capabilities()['desktop_driver']['implemented'])
+        self.assertFalse(capabilities()['desktop_driver']['enabled_by_default'])
+        self.assertFalse(capabilities()['desktop_driver']['unattended_acceptance'])
 
     def test_cli_pipeline_utf8_even_under_ascii_environment(self):
         self.run_collect()

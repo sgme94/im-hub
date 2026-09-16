@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "sources": {
+    "kim-work": {
+      "enabled": false, "platform": "kim", "transport": "kim-sqlite", "adapter": "database-json",
+      "account_namespace": "reviewed-account", "account_directory": "C:/IMData/kim-account",
+      "database": "C:/IMData/kim-account/user.db", "conversation_id": "123", "expected_session_id": 456,
+      "conversation_name": "示例工作群", "source_epoch": "reviewed-generation-1", "data_class": "real",
+      "initial_since": "2026-09-01T00:00:00+08:00", "overlap_seconds": 3600, "max_records": 10000
+    },
+    "wechat-cache": {
+      "enabled": false, "platform": "wechat", "transport": "wechat-sqlite", "adapter": "database-json",
+      "account_namespace": "reviewed-account", "account_directory": "C:/IMData/wechat-cache",
+      "shards": [{"id":"message-0","path":"C:/IMData/wechat-cache/message_0.db"}],
+      "conversation_id": "example@chatroom", "conversation_name": "示例工作群", "source_epoch": "reviewed-generation-1",
+      "data_class": "real", "initial_since": "2026-09-01T00:00:00+08:00", "max_records": 10000
+    },
+    "tim-history": {
+      "enabled": false, "platform": "qq", "transport": "tim-export", "adapter": "tim-sequence-json",
+      "account_namespace": "reviewed-account", "conversation_id": "reviewed-tim-group", "conversation_name": "示例工作群",
+      "source_epoch": "reviewed-export-sequence-1", "data_class": "real", "export_mode": "full-history-append-only",
+      "input": "C:/IMData/tim/history.txt", "manifest": "C:/IMData/tim/history.manifest.json", "max_records": 10000
+    },
+    "wecom-copy": {
+      "enabled": false, "platform": "wecom", "transport": "wecom-clipboard", "adapter": "wecom-native",
+      "account_namespace": "reviewed-account", "conversation_id": "reviewed-wecom-binding", "conversation_name": "示例工作群",
+      "source_epoch": "reviewed-native-profile-1", "data_class": "real", "binding": "66", "max_records": 100
+    }
+  }
+}

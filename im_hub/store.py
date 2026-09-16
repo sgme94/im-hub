@@ -7,6 +7,7 @@ import os
 import shutil
 import sqlite3
 import subprocess
+import sys
 import uuid
 from pathlib import Path
 from . import __version__
@@ -14,8 +15,11 @@ from .adapters import normalize
 from .common import (ROOT, IMError, binding_spec, canonical, check_home, db_path, digest,
                      iso_epoch, load_json, now, read_blob, readonly, stream_key, write_new, writer)
 
-CHATLAB = Path(os.environ.get('IM_HUB_CHATLAB_DIR', str(ROOT / 'node_modules/chatlab-cli'))).expanduser().resolve()
-NODE = Path(os.environ.get('IM_HUB_NODE') or shutil.which('node') or 'node')
+PORTABLE_ROOT = Path(sys.executable).resolve().parent if getattr(sys, 'frozen', False) else ROOT
+PACKAGED_BACKEND = PORTABLE_ROOT / 'backend/node_modules/chatlab-cli'
+CHATLAB = Path(os.environ.get('IM_HUB_CHATLAB_DIR', str(PACKAGED_BACKEND if PACKAGED_BACKEND.is_dir() else ROOT / 'node_modules/chatlab-cli'))).expanduser().resolve()
+PACKAGED_NODE = PORTABLE_ROOT / 'backend/node.exe'
+NODE = Path(os.environ.get('IM_HUB_NODE') or (str(PACKAGED_NODE) if PACKAGED_NODE.is_file() else shutil.which('node')) or 'node')
 GUARD = Path(__file__).with_name('offline_guard.mjs')
 
 def backend_info() -> dict:
@@ -170,7 +174,13 @@ def ingest(home: Path, source: Path, spec: dict, observed_at: str, since=None, u
                 payload = payload_for(spec, rows, saved['source_observed_at'])
                 if read_blob(folder / 'messages.jsonl') != ''.join(canonical(r) + '\n' for r in rows).encode('utf-8'):
                     raise IMError('STAGED_MESSAGES_TAMPERED')
-                if load_json(read_blob(folder / 'chatlab.json')) != payload:
+                staged_payload = load_json(read_blob(folder / 'chatlab.json'))
+                # Generator version is descriptive metadata, not message semantics.
+                # Recover older prepared imports without rewriting their immutable file.
+                generator = staged_payload.get('chatlab', {}).get('generator') if isinstance(staged_payload, dict) else None
+                if generator in ('im-hub/0.2.0', 'im-hub/0.3.0', 'im-hub/' + __version__):
+                    payload['chatlab']['generator'] = generator
+                if staged_payload != payload:
                     raise IMError('STAGED_CHATLAB_PAYLOAD_TAMPERED')
             else:
                 staging = home / 'batches' / ('.preparing-' + uuid.uuid4().hex)

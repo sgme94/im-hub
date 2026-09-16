@@ -56,10 +56,43 @@ def build_parser():
     c.add_argument('--config', required=True, type=Path)
     c.add_argument('--source', required=True)
     c.add_argument('--dry-run', action='store_true')
+    c.add_argument('--allow-ui', action='store_true', help='Explicit opt-in for a reviewed desktop profile')
+    c.add_argument('--after-sequence', type=int, help='WeCom native clipboard baseline before a normal selected-message copy')
     c.add_argument('--until', help='Database-only exclusive end time, with explicit timezone')
     c.add_argument('--reconcile', action='store_true', help='Database-only full configured-window scan for older late arrivals')
     cs = commands.add_parser('collection-status', help='Read acquisition checkpoints, pending runs and errors without collection')
     cs.add_argument('--source')
+    ds = commands.add_parser('desktop-status', help='Read TIM/native clipboard collection states')
+    ds.add_argument('--source')
+    commands.add_parser('clipboard-status', help='Read only the current clipboard sequence, not contents')
+    commands.add_parser('selftest', help='Run disposable synthetic four-platform import/query/backup checks against the actual local backend')
+    capture = commands.add_parser('capture', help='Wait for one normal WeCom selected-message copy; no automatic UI or clipboard history')
+    capture.add_argument('--config', required=True, type=Path)
+    capture.add_argument('--source', required=True)
+    capture.add_argument('--wait-seconds', type=int, default=60)
+    config = commands.add_parser('config-check', help='Validate profiles without opening a client or data source')
+    config.add_argument('--config', required=True, type=Path)
+    run = commands.add_parser('run', help='Ordered foreground collection passes; does not install a scheduler')
+    run.add_argument('--config', required=True, type=Path)
+    run.add_argument('--source', action='append')
+    run.add_argument('--cycles', type=int, default=1)
+    run.add_argument('--interval', type=int, default=60)
+    run.add_argument('--dry-run', action='store_true')
+    run.add_argument('--allow-ui', action='store_true')
+    run.add_argument('--reconcile', action='store_true')
+    commands.add_parser('verify', help='Verify stored messages, provenance and SQLite integrity without collecting')
+    h = commands.add_parser('health', help='Inspect integrity, freshness and collection errors')
+    h.add_argument('--config', type=Path)
+    h.add_argument('--max-age-seconds', type=int, default=3600)
+    b = commands.add_parser('backup', help='Create a new private ZIP snapshot outside the data home')
+    b.add_argument('--output', required=True, type=Path)
+    r = commands.add_parser('restore', help='Verify and restore a backup only into a new directory')
+    r.add_argument('--input', required=True, type=Path)
+    r.add_argument('--destination', required=True, type=Path)
+    for name in ('export-all', 'report'):
+        sub = commands.add_parser(name, help='Export the whole bounded query, not just the first page')
+        filters(sub, query=True)
+        sub.add_argument('--max-records', type=int, default=10000)
     for name in ('sources', 'status', 'coverage'):
         filters(commands.add_parser(name, help='Read source coverage/freshness; no refresh'))
     for name in ('query', 'export', 'analyze'):
@@ -101,7 +134,41 @@ def main(argv=None):
         elif a.command == 'capabilities':
             data = capabilities()
         elif a.command == 'collect':
-            data = collect(home, a.config, a.source, a.dry_run, until=a.until, reconcile=a.reconcile)
+            data = collect(home, a.config, a.source, a.dry_run, until=a.until, reconcile=a.reconcile,
+                           allow_ui=a.allow_ui, after_sequence=a.after_sequence)
+        elif a.command == 'desktop-status':
+            from .desktop_sources import desktop_status
+            data = desktop_status(home, a.source)
+        elif a.command == 'clipboard-status':
+            from .windows_desktop import clipboard_status
+            data = clipboard_status()
+        elif a.command == 'selftest':
+            from .selftest import selftest
+            data = selftest()
+        elif a.command == 'capture':
+            from .windows_desktop import wait_and_capture
+            data = wait_and_capture(home, a.config, a.source, a.wait_seconds)
+        elif a.command == 'config-check':
+            from .operations import config_check
+            data = config_check(a.config)
+        elif a.command == 'run':
+            from .operations import run_cycles
+            data = run_cycles(home, a.config, a.source, a.cycles, a.interval, a.dry_run, a.allow_ui, a.reconcile)
+        elif a.command == 'verify':
+            from .operations import verify
+            data = verify(home)
+        elif a.command == 'health':
+            from .operations import health
+            data = health(home, a.config, a.max_age_seconds)
+        elif a.command == 'backup':
+            from .operations import backup
+            data = backup(home, a.output)
+        elif a.command == 'restore':
+            from .operations import restore
+            data = restore(a.input, a.destination)
+        elif a.command in ('export-all', 'report'):
+            from .operations import export_all, report
+            data = (report if a.command == 'report' else export_all)(home, query_args(a), a.max_records)
         elif a.command == 'collection-status':
             data = collection_status(home, a.source)
         elif a.command == 'doctor':
@@ -133,7 +200,7 @@ def main(argv=None):
         else:
             raise IMError('UNKNOWN_COMMAND')
         print(json.dumps({'ok': True, 'command': a.command, 'data': data}, ensure_ascii=False, allow_nan=False))
-        return 0
+        return 4 if a.command == 'run' and not data['success'] else 0
     except IMError as exc:
         print(json.dumps({'ok': False, 'error': {'code': exc.code}, 'source_refreshed': False}))
         return 3 if exc.code in ('WRITER_BUSY', 'DATASET_CHANGED_RETRY_QUERY', 'CURSOR_STALE_RESTART_QUERY') else 2

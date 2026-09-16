@@ -1,7 +1,7 @@
-"""Explicit configured file or read-only database collection. No GUI/model/shell.
+"""Explicit file, database and opt-in desktop collection. No model or shell recipes.
 
 The source exporter must finish an immutable file and an observation manifest first.
-This module does NOT claim to navigate TIM or WeCom or refresh a client database.
+Desktop profiles are calibrated separately; general unattended client use is not implied.
 """
 from __future__ import annotations
 import re
@@ -22,10 +22,12 @@ def capabilities() -> dict:
         'platforms': {
             'wechat': {'input': ['normalized-v2', 'database-json'], 'database_transport': 'wechat-sqlite', 'upstream': 'explicit already-plaintext cache; encrypted-client refresh not implemented', 'upstream_ui_required': False},
             'kim': {'input': ['normalized-v2', 'database-json'], 'database_transport': 'kim-sqlite', 'upstream': 'live read-only native SQLite', 'upstream_ui_required': False},
-            'qq': {'input': ['tim-txt', 'qce-json'], 'upstream': 'TIM official export; QCE real login not accepted', 'tim_export_ui_required': True},
-            'wecom': {'input': ['wecom-native', 'wecom-json'], 'upstream': 'normal selected-message clipboard copy', 'upstream_ui_required': True},
+            'qq': {'input': ['tim-txt', 'tim-sequence-json', 'qce-json'], 'upstream': 'TIM official export with exact prefix reconciliation; QCE real login not accepted', 'tim_export_ui_required': True},
+            'wecom': {'input': ['wecom-native', 'wecom-json'], 'native_clipboard_capture': True, 'upstream': 'normal selected-message clipboard copy', 'upstream_ui_required': True},
         },
-        'desktop_driver': {'implemented': False, 'planned': 'bounded deterministic state machine', 'llm_required': False},
+        'desktop_driver': {'implemented': True, 'enabled_by_default': False, 'client_profile_calibration_required': True,
+                           'unattended_acceptance': False, 'strategy': 'bounded_semantic_state_machine', 'llm_required': False},
+        'product_operations': ['config-check', 'run', 'capture', 'desktop-status', 'export-all', 'report', 'verify', 'health', 'backup', 'restore'],
         'analysis': {'current': 'deterministic keyword triage', 'semantic_llm': 'optional external consumer, not implemented'},
     }
 
@@ -38,7 +40,8 @@ def _path(base: Path, value: object) -> Path:
     return (candidate if candidate.is_absolute() else base / candidate).resolve()
 
 
-def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=None, until=None, reconcile=False) -> dict:
+def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=None, until=None, reconcile=False,
+            allow_ui=False, after_sequence=None, driver=None) -> dict:
     if not re.fullmatch(r'[A-Za-z0-9_.-]{1,80}', source_name):
         raise IMError('INVALID_SOURCE_NAME')
     config = config.resolve()
@@ -54,6 +57,12 @@ def collect(home: Path, config: Path, source_name: str, dry_run=False, backend=N
     if profile.get('transport') in ('kim-sqlite', 'wechat-sqlite'):
         from .acquisition import collect_database
         return collect_database(home, config.parent, source_name, profile, dry_run, backend, until, reconcile)
+    if profile.get('transport') in ('tim-export', 'tim-ui', 'wecom-clipboard', 'wecom-ui'):
+        if until is not None or reconcile:
+            raise IMError('DATABASE_ONLY_COLLECTION_OPTION')
+        from .desktop_sources import collect_desktop
+        return collect_desktop(home, config.parent, source_name, profile, dry_run, backend,
+                               allow_ui, after_sequence, driver)
     if profile.get('transport') != 'file':
         raise IMError('CLIENT_DRIVER_NOT_IMPLEMENTED')
     if until is not None or reconcile:
