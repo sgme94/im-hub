@@ -42,8 +42,12 @@ def prepare_desktop_profile(base: Path, profile: dict) -> dict:
         ui = p.get('desktop')
         if not isinstance(ui, dict) or ui.get('profile_reviewed') is not True:
             raise IMError('REVIEWED_DESKTOP_PROFILE_REQUIRED')
-        from .windows_desktop import validate_profile
-        validate_profile(ui, p['platform'], p['conversation_name'])
+        if ui.get('strategy') == 'visual-anchors-v1':
+            from .visual_desktop import prepare_visual_profile
+            p['desktop'] = prepare_visual_profile(base, ui, p['platform'])
+        else:
+            from .windows_desktop import validate_profile
+            validate_profile(ui, p['platform'], p['conversation_name'])
     if 'since' in p: iso_epoch(p['since'])
     return p
 

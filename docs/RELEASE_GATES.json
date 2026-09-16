@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0rc2",
+  "version": "1.0.0rc3.dev1",
   "delivery_kind": "installable_product_release_candidate",
   "full_user_goal_accepted": false,
   "mandatory_llm": false,
@@ -7,9 +7,11 @@
   "core_implemented": ["profile_validation", "file_database_ingestion", "strict_TIM_prefix_reconciliation", "explicit_WeCom_copy_capture", "recoverable_import", "cross_platform_query", "complete_export", "evidence_report", "health_integrity", "backup_restore", "bounded_foreground_runs", "portable_selftest"],
   "gates": [
     {"id":"wechat_live_refresh","status":"native_read_verified","detail":"Current encrypted DB and committed WAL read with an existing key cache; 62 real records, three passes. New events during the observation interval not seen."},
-    {"id":"tim_ui_calibration","status":"not_live_accepted","detail":"Bounded semantic driver exists; current real export UI has not passed end-to-end acceptance."},
+    {"id":"tim_ui_calibration","status":"bound_foreground_export_verified","detail":"Deterministic visual/native driver automatically exported 4657 real records and replayed with zero new records. Requires initially foregrounded TIM and private reviewed anchors; new-message delay not measured."},
     {"id":"source_version_policy","status":"passed","version_required":false,"detail":"No source version whitelist; version and missing version are diagnostic only. Process, scope, controls and native payload capabilities remain checked."},
-    {"id":"wecom_ui_history","status":"not_live_accepted","detail":"Current accessibility tree has only a window and two unnamed groups; message nodes are unavailable. Actual UI acceptance needs an idle interactive desktop, not a version whitelist."},
+    {"id":"wecom_ui_history","status":"blocked_during_live_acceptance","detail":"Bound work conversation and Copy/Multiselect menu observed. Platform safety check blocked clipboard baseline read; no alternate route or new native capture. Visual paging remains unimplemented/unverified, not version-gated."},
+    {"id":"cross_client_orchestration","status":"not_accepted","detail":"TIM visual driver requires the correct initial foreground client; fully automatic safe inter-client focus orchestration not implemented."},
+    {"id":"natural_new_event_latency","status":"not_measured","detail":"No per-platform naturally arriving new-event delay evidence in this acceptance. Existing records and replay are not new messages."},
     {"id":"unattended_24_72h","status":"not_run","detail":"No schedule installed; bounded command tests do not prove unattended operation."},
     {"id":"attachments_and_edits","status":"partial","detail":"Unknown types/attachment bodies are retained as gaps; edits/retractions conflict rather than silently overwriting."}
   ]

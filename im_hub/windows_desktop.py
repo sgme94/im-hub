@@ -327,6 +327,9 @@ class NativeWindows:
 
 def acquire_ui(profile: dict, folder: Path, driver=None):
     ui = profile['desktop']; platform = profile['platform']
+    if ui.get('strategy') == 'visual-anchors-v1':
+        from .visual_desktop import acquire_visual
+        return acquire_visual(profile, folder)
     validate_profile(ui, platform, profile['conversation_name'])
     native = driver or NativeWindows()
     with native.lease(platform, ui):

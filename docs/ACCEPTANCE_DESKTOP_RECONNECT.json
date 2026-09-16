@@ -1,0 +1,102 @@
+{
+  "schema": "im-hub-desktop-acceptance/1",
+  "version": "1.0.0rc3.dev1",
+  "source_version_required": false,
+  "source_code_sha256": {
+    "im_hub/visual_desktop.py": "1578687e7ed93cf67865d73a89ed7714ffc5575b6d695092aa34715602cbfb5b",
+    "im_hub/desktop_sources.py": "78d165c3630eabea9725edf4f349216936c1ce152154db1884f1538deb7485ae",
+    "im_hub/windows_desktop.py": "52348024223751d7e028e32c03d49e30af5767919a13c91e06d09150ef2dadbc",
+    "pyproject.toml": "8d06d388ea272c88fd0903a17d536dbf081b6849cd091f0aae8677462e6c9c08",
+    "im_hub/__init__.py": "83ae897e4f21423848731bdcc7bc25e9486b86148944984dd25cebc6753e690f",
+    "tests/test_visual_desktop.py": "9c2e5236e864be0c4431bdf4f5d445a0548f973046a6d0cc7994e6787534f52d"
+  },
+  "regression": {
+    "tests": 170,
+    "failures": 0,
+    "errors": 0,
+    "command": "python -m unittest discover -s tests"
+  },
+  "tim": {
+    "automatic_native_export_verified": true,
+    "records": 4657,
+    "new_records": 0,
+    "duplicates": 4657,
+    "captured_at": "2026-09-16T13:17:58.469854+00:00",
+    "seconds": 15.782,
+    "native_filename_verified": true,
+    "native_export_group_verified": true,
+    "visual_anchor_matching": true,
+    "automated_actions": 4,
+    "llm_calls": 0,
+    "ocr_calls": 0,
+    "initial_foreground_required": true,
+    "all_client_history_complete": false,
+    "new_event_latency_measured": false
+  },
+  "native_database_readback": {
+    "checked_at": "2026-09-16T13:25:09.345663+00:00",
+    "results": [
+      {
+        "source": "wechat-live-work",
+        "records": 62,
+        "new_records": 0,
+        "duplicates": 62,
+        "source_observed_at": "2026-09-16T13:25:05.632981+00:00",
+        "seconds": 2.36,
+        "transport": "wechat-live"
+      },
+      {
+        "source": "kim-work",
+        "records": 0,
+        "new_records": 0,
+        "duplicates": 0,
+        "source_observed_at": "2026-09-16T13:25:07.913033+00:00",
+        "seconds": 0.109,
+        "transport": "kim-sqlite"
+      }
+    ],
+    "integrity": {
+      "valid": true,
+      "records_verified": 4728,
+      "streams": 3,
+      "databases_checked": 6,
+      "pending_batches": 0,
+      "query_only": true,
+      "source_history_complete": false
+    },
+    "platform_counts": [
+      {
+        "platform": "kim",
+        "records": 9
+      },
+      {
+        "platform": "wechat",
+        "records": 62
+      },
+      {
+        "platform": "qq",
+        "records": 4657
+      }
+    ]
+  },
+  "wecom": {
+    "bound_work_conversation_opened": true,
+    "context_menu_observed": true,
+    "copy_and_multiselect_visible": true,
+    "clipboard_baseline_tool_call": "blocked_by_platform_safety_check",
+    "native_clipboard_capture_performed": false,
+    "automatic_pagination_verified": false,
+    "alternate_route_attempted_after_block": false,
+    "menu_dismissed": true
+  },
+  "full_user_goal_accepted": false,
+  "message_sending_performed": false,
+  "schedules_created": false,
+  "mymind_formal_state_written": false,
+  "pending": [
+    "WeCom authorized native clipboard capture and automated paging acceptance",
+    "Automatic safe foreground orchestration between clients",
+    "Naturally arriving new message delay measurement on every configured platform",
+    "Unattended soak and real client restart recovery"
+  ]
+}
