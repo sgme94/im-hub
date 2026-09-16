@@ -6,6 +6,8 @@
 
 ## 当前状态
 
+`1.0.0rc4` 修复持续运行中实际捕获的剪贴板访问失败和非 JSON 错误：保留原生 API 与严格身份/序列检查，只进行短时有界等待，仍不可用则结构化失败；不改变权限或使用替代读取路径。253项测试与独立EXE三轮四平台恢复验证通过；修复及旧故障见[说明](docs/CLIPBOARD_RECOVERY.md)和[验收记录](docs/ACCEPTANCE_RECOVERY.json)。
+
 `1.0.0rc3` 已跑通四个平台当前客户端的自动获取及跨应用切换：微信当前加密库/WAL、KIM 原生库、TIM 官方 TXT 自动导出、企微逐条原生复制/三页历史/回到最新。同一命令两轮无人工介入，4,736 条存量记录校验通过，第二轮新增 0。新增有截止时间、单写者、受控子进程树、STOP 和状态日志的 `soak`。见[四平台自动采集手册](docs/AUTOMATED_COLLECTION.md)。
 
 `1.0.0rc2` 新增微信当前加密库/WAL自动只读采集，取消所有采集源软件版本白名单。已有的产品能力：Windows x64 便携包、配置校验、多来源有界运行、KIM 增量／微信明文缓存、TIM 完整导出的精确前缀去重、企微显式原生复制、跨平台查询、完整证据导出／Markdown 汇编、校验、备份恢复、内置四平台合成自检。详细操作见 [产品手册](docs/PRODUCT_GUIDE.md)。
@@ -24,7 +26,7 @@
 
 ## 安装
 
-Windows 便携包：整体解压发行页 `im-hub-1.0.0rc3-windows-x64.zip`，保留 `_internal` 和 `backend`，直接运行下列命令。此包自带 Python 运行时、Node 与固定 ChatLab 后端；不需要另装前端或运行 npm。
+Windows 便携包：整体解压发行页 `im-hub-1.0.0rc4-windows-x64.zip`，保留 `_internal` 和 `backend`，直接运行下列命令。此包自带 Python 运行时、Node 与固定 ChatLab 后端；不需要另装前端或运行 npm。
 
 ```powershell
 .\im-hub.exe --help

@@ -1,0 +1,161 @@
+{
+  "schema": "im-hub-recovery-acceptance/1",
+  "version": "1.0.0rc4",
+  "recorded_at": "2026-09-16T16:33:58.194833+00:00",
+  "retained_observed_fault": {
+    "schema": "im-hub-observed-fault/1",
+    "version_with_fault": "1.0.0rc3",
+    "fix_version": "1.0.0rc4",
+    "old_segment_started_at": "2026-09-16T15:46:40.186980+00:00",
+    "old_segment_completed_at": "2026-09-16T16:06:01.008784+00:00",
+    "old_segment_wall_seconds": 1160.822,
+    "completed_cycles": 14,
+    "complete_four_source_successful_cycles": 10,
+    "per_platform_results": {
+      "kim": {
+        "ok": 14
+      },
+      "qq": {
+        "ok": 14
+      },
+      "wechat": {
+        "ok": 14
+      },
+      "wecom": {
+        "ok": 10,
+        "failed": 1,
+        "paused": 3
+      }
+    },
+    "observed_native_error": {
+      "api": "OpenClipboard",
+      "win32_error": 5,
+      "parent_code": "SOURCE_CHILD_INVALID_JSON",
+      "specific_competing_process_known": false
+    },
+    "controlled_stop": "DESKTOP_STOP_REQUESTED",
+    "old_failed_segment_retained": true,
+    "fix_tests": {
+      "tests": 253,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "real_clipboard_lock_test_content_read": false,
+    "source_message_editing_performed": false
+  },
+  "unit_tests": {
+    "tests": 253,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "portable_recovery": {
+    "binary_mode": true,
+    "host_python_node_not_on_PATH": true,
+    "exe_sha256": "cd08ff66088dae2e31321d3a9a60bd9f473b650cd97e1192379baa9950482e1b",
+    "started_at": "2026-09-16T16:29:07.490810+00:00",
+    "completed_at": "2026-09-16T16:33:03.295337+00:00",
+    "wall_seconds": 235.805,
+    "cycles": 3,
+    "all_sources_succeeded": true,
+    "results": [
+      {
+        "platform": "kim",
+        "status": "ok",
+        "records": 0,
+        "new_records": 0,
+        "duplicates": 0,
+        "duration_seconds": 0.33,
+        "ui_performed": false,
+        "client_activated": false
+      },
+      {
+        "platform": "qq",
+        "status": "ok",
+        "records": 4657,
+        "new_records": 0,
+        "duplicates": 4657,
+        "duration_seconds": 16.12,
+        "ui_performed": true,
+        "client_activated": true
+      },
+      {
+        "platform": "wechat",
+        "status": "ok",
+        "records": 62,
+        "new_records": 0,
+        "duplicates": 62,
+        "duration_seconds": 2.345,
+        "ui_performed": false,
+        "client_activated": false
+      },
+      {
+        "platform": "wecom",
+        "status": "ok",
+        "records": 8,
+        "new_records": 0,
+        "duplicates": 8,
+        "duration_seconds": 46.911,
+        "ui_performed": true,
+        "client_activated": true
+      }
+    ],
+    "records_verified": 4736,
+    "pending_batches": 0
+  },
+  "natural_new_event_candidates": {
+    "kim": 0,
+    "qq": 0,
+    "wechat": 0,
+    "wecom": 0
+  },
+  "natural_latency_measured": false,
+  "source_version_gate": false,
+  "privilege_or_permission_changes": false,
+  "old_failure_not_erased": true,
+  "full_dedicated_window_completed": false,
+  "font_files": 0,
+  "source_code_sha256": {
+    "im_hub/acquisition.py": "8e3f8558903530b93bf171bcaae6f5645168c70a87e7c6dc3294bde8ef4ae236",
+    "im_hub/adapters.py": "24c8e03e956406dfcbb9f8c2b4f19b08cf34a06be081a56794d381ead4e24df4",
+    "im_hub/analysis.py": "eca38311d817eb93f382bb3d4b0a60603f4ff6ac0304be42aed12ce944d10fbf",
+    "im_hub/cli.py": "91fe3cb740e5dfebcf0ff74026090a3ebfe15ebc12c3b4f0f393d3c6071c307e",
+    "im_hub/clipboard_snapshot.py": "c557cb0d48a347f2645bd0ab1f1b4d2a69244702f3a63c927e0a98ee881f1ba9",
+    "im_hub/collection.py": "cd8fdca0b6335df5ba3ea9d0a19a4f10120e45739cfcce9de6f4938c58467103",
+    "im_hub/common.py": "76a4bfbb60169636ae3e5fba2876ee4961bf2b9178ea4a6c98029645ad4c08d3",
+    "im_hub/database_readers.py": "a903dac54c1f6033d99a111e5edb94dd9b5f3edaa18ead5b2ab5051530961d94",
+    "im_hub/desktop_runtime.py": "998b5c2a1b7dca0dbae3f0c775f7720307ab541e122e980daf35d85d1fe4ccf4",
+    "im_hub/desktop_sources.py": "78d165c3630eabea9725edf4f349216936c1ce152154db1884f1538deb7485ae",
+    "im_hub/operations.py": "f5fd80d125d7e85a0eecc6b344e618a4d3d6f750c2c06fb95239ecddb37cc6ec",
+    "im_hub/query.py": "95f8d1f2f8ab3650bdef9731689696ba56a38c05f9eb0d403b6cb16cc8b10e8c",
+    "im_hub/selftest.py": "d356c8135bc1b1f8a85e2a66f7474d11dcf2be6c2c5ca0f792dba36814735fbf",
+    "im_hub/soak.py": "6e39f6611e41a2966c62358f8babbcd9cef3dd1228fd51328579712233536db2",
+    "im_hub/store.py": "6b0b265297acc8a8f8288b1417b2e3b9da874717fa2dd8e48f748743630dfc04",
+    "im_hub/tim_sequence.py": "35c86a8972c34f094e7eb096f64208de93b81f14cfc1ca9dc5e5c97c7f017e5e",
+    "im_hub/visual_desktop.py": "0e18fa3b308b07ad1f22e9a53bd1c692df4977e153bf8e76bfaf27bb2c6b0374",
+    "im_hub/wechat_live.py": "955ee7e2eca203fd176ffd819021f21eba625c2f41ded4f1baf93b2bc9bc1cc9",
+    "im_hub/wecom_visual.py": "a34a11fc929f927c56c7bf23fca19ab97cecaa5424ded856b8dae6555c5bbed2",
+    "im_hub/windows_desktop.py": "0a393f29418fd9fa0494ed0cf2563fefec77af261520947d0cafdc91d85cb532",
+    "im_hub/__init__.py": "971250887c894f6829851d3e9bd813d50ab6369603d918a78e207a1fafe07192",
+    "im_hub/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "im_hub/codecs/desktop.py": "498df7e15772eaf0a0ab938d5c971b8f2aa637bd876bc13f0b58b739deefb0e9",
+    "im_hub/codecs/qce.py": "acff41dd2c73e59b2f5f82bc0a6b9ea56eaf34b5ffadd87ea06178f1c2d0d83c",
+    "im_hub/codecs/wecom_wire.py": "8c231cc3c32b13ae4879e8ac242350d177096f4c950cd30a9297730ccb9bd78c",
+    "im_hub/codecs/__init__.py": "d0d298d8d4f10ae78493dfa76718e66c3b84ffcc9069b8f6745f61da96035806",
+    "tests/test_clipboard_snapshot.py": "1dbb30a16d658fbe966de4d55befb9c97b81a995b7de45042258243632a95dc3",
+    "tests/test_collection.py": "894bfc8360857cd9004fc2635c586327a6e70cf680b2bac6258dcd0fc508cc84",
+    "tests/test_core.py": "f3b9687167fc95385c154fbb55285ae78e40857e08410db2fb9761b8ba9e38fc",
+    "tests/test_database_collection.py": "92b575cc83c6538030c5016c05f83e5444faf5ee30641e2a42a6efa25a9e43e8",
+    "tests/test_desktop_activation.py": "d5f19c468c823e99e744ff6ca502e52deda171287bf7bd4d7771975e3dc766cb",
+    "tests/test_owned_children.py": "222815f3503af323b57cb70a7179bd0a9e7eff9ef7075c25cc5602a0446e09f4",
+    "tests/test_product.py": "623df5fef341dd7a733fce7194f504c3fd2be29ab7688b3f379ab215148d4d18",
+    "tests/test_soak.py": "34628e450e0a88e5ae00a619c011b6b6b7f33ecb797fdfb411213a95dd2cd9c4",
+    "tests/test_version_policy.py": "2b7bf0b7f410b8f7e77df4a56a946ad16d8e97bbcc56e2c72fe5db12adf79795",
+    "tests/test_visual_desktop.py": "796b45e66807e801840df504aafe507811e6f3c31cb85296955ad2371a791cb7",
+    "tests/test_wechat_live.py": "b36497e1e33b44382d81ed7441c1ffb3d00cd820f3ea2a6c25bce87a0262e76d",
+    "tests/test_wecom_visual.py": "8ddf476e291929ccd33dd3a87c6d77e797ebabc30dddf11fd1e4a11dfffb57c5",
+    "scripts/build_windows.py": "87eb5c52d6b22049d9a6aa7c02d1fc0d253faff6031bf2cd4497d4b601161860",
+    "pyproject.toml": "23b751162fbc282fed079fac8cdab48b923721d94ec457db5146ea1f9e5d4395"
+  }
+}

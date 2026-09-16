@@ -145,7 +145,7 @@ class NativeWindows:
             pass
         return path.name.lower(), version
 
-    def capture(self, after_sequence):
+    def capture(self, after_sequence, guard=None):
         if isinstance(after_sequence, bool) or not isinstance(after_sequence, int) or not 0 <= after_sequence <= 0xffffffff:
             raise IMError('INVALID_BASELINE_SEQUENCE')
         seq = self.user.GetClipboardSequenceNumber()
@@ -156,7 +156,8 @@ class NativeWindows:
         identity = self.process_identity(pid)
         if not accepts_client('wecom', identity): raise IMError('CLIPBOARD_OWNER_NOT_WECOM')
         if self.pid is not None and pid != self.pid: raise IMError('CLIPBOARD_WRONG_CLIENT_INSTANCE')
-        self.clip.OpenClipboard()
+        from .clipboard_snapshot import open_snapshot
+        attempts=open_snapshot(self.clip,self.user,owner,seq,guard)
         try:
             if self.clip.GetClipboardOwner() != owner or self.user.GetClipboardSequenceNumber() != seq:
                 raise IMError('CLIPBOARD_CHANGED_BEFORE_READ')
@@ -168,7 +169,7 @@ class NativeWindows:
                 raise IMError('CLIPBOARD_CHANGED_DURING_READ')
         finally: self.clip.CloseClipboard()
         return blob, {'captured_at': now(), 'sequence': seq, 'client_version': identity[1],
-                      'version_policy': VERSION_POLICY,
+                      'version_policy': VERSION_POLICY, 'clipboard_open_attempts': attempts,
                       'clipboard_owner_verified': True, 'process_memory_read': False, 'transport': 'wecom-clipboard'}
 
     def input_tick(self):
@@ -315,7 +316,7 @@ class NativeWindows:
                 end = time.monotonic() + 2
                 while self.user.GetClipboardSequenceNumber() == baseline and time.monotonic() < end:
                     time.sleep(0.05); self.guard()
-                blob, _ = self.capture(baseline); blobs.append(blob); page_hashes.append(digest(blob))
+                blob, _ = self.capture(baseline,guard=self.guard); blobs.append(blob); page_hashes.append(digest(blob))
                 self.guard(); self.a.SendKeys('{Esc}', waitTime=0); self.last_input = self.input_tick()
                 if sum(map(len, blobs)) > MAX_BYTES: raise IMError('DESKTOP_CAPTURE_SIZE_LIMIT')
             signature = digest(page_hashes)

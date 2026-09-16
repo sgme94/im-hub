@@ -158,7 +158,7 @@ class WeComReader:
         end=time.monotonic()+3
         while s.n.user.GetClipboardSequenceNumber()==baseline and time.monotonic()<end:
             time.sleep(.05);s.guard()
-        blob,meta=s.n.capture(baseline)
+        blob,meta=s.n.capture(baseline,guard=s.guard)
         from .codecs.desktop import enriched_wecom
         rows=enriched_wecom(blob,s.p['account_namespace'],s.p['conversation_name'],s.p['binding'])
         if len(rows)!=expected or any(not r.get('metadata_fields_available') for r in rows):

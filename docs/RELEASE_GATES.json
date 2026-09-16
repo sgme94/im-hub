@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0rc3",
+  "version": "1.0.0rc4",
   "delivery_kind": "configured_four_platform_cli_release_candidate",
   "configured_four_platform_automatic_collection_verified": true,
   "full_user_goal_accepted": false,
@@ -15,8 +15,9 @@
     {"id":"source_version_policy","status":"passed","detail":"Source version absent or changed does not block; actual identity/control/format checks remain."},
     {"id":"store_integrity","status":"passed","records_at_initial_acceptance":4736,"detail":"Four streams verified; no pending batches at the initial acceptance checkpoint."},
     {"id":"owned_process_stop","status":"passed_tests","detail":"Synthetic deadline/STOP/input tests and actual harmless child/grandchild kill-on-close ownership tests. No source IM process terminated."},
+    {"id":"clipboard_error_recovery","status":"passed_targeted_and_real_retest","detail":"Observed RC3 OpenClipboard error and JSON escape retained. RC4 adds bounded same-API waiting with owner/sequence/deadline checks and structured native failures; 253 tests and three real frozen four-source cycles passed. See ACCEPTANCE_RECOVERY.json."},
     {"id":"natural_new_event_observation","status":"awaiting_real_events","detail":"No naturally generated new messages in initial two-cycle test. Never substitute stored history or generated fixtures for this observation."},
-    {"id":"dedicated_window_soak","status":"prepared_not_yet_completed","detail":"Observe actual runtime/soak segment logs and authorized end; do not infer duration from configuration."},
+    {"id":"dedicated_window_soak","status":"interrupted_then_recovered_remaining_window_pending","detail":"RC3 first segment: 14 rounds, 10 complete four-source successes, one WeCom failure and three paused entries, maintenance STOP. RC4 three-round recovery passed; remaining authorized window must be observed, not inferred. Original deadline is not extended."},
     {"id":"extended_resilience","status":"future_optional","detail":"24-72h testing is a separate future exercise, not claimed within the user's present eight-hour authorization."},
     {"id":"attachments_and_edits","status":"partial","detail":"Unknown/attachment content stays visibly incomplete; identity-content edits conflict rather than silently overwrite."}
   ]

@@ -224,7 +224,7 @@ def main(argv=None):
     except IMError as exc:
         print(json.dumps({'ok': False, 'error': {'code': exc.code}, 'source_refreshed': False}))
         return 3 if exc.code in ('WRITER_BUSY', 'DATASET_CHANGED_RETRY_QUERY', 'CURSOR_STALE_RESTART_QUERY') else 2
-    except (OSError, ValueError, KeyError, TypeError, sqlite3.Error, ImportError, RecursionError) as exc:
+    except Exception as exc:
         # Exception text can contain source bodies/paths. Only the type reaches stdout.
         print(json.dumps({'ok': False, 'error': {'code': 'LOCAL_OPERATION_FAILED', 'type': type(exc).__name__}}))
         return 2
