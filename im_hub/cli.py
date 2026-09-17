@@ -53,6 +53,8 @@ def build_parser():
     commands.add_parser('init', help='Create a dedicated private ChatLab/provenance home')
     commands.add_parser('doctor', help='Check pinned local dependency; never install or log in')
     commands.add_parser('capabilities', help='Report implemented and pending capabilities; no client access')
+    probe = commands.add_parser('probe-desktop-directory', help='Read current TIM/WeCom sidebar capability; no focus, input, collection or store writes')
+    probe.add_argument('--platform', required=True, choices=('qq','wecom'))
     discovery = commands.add_parser('discover-week', help='Discover explicit account metadata; GUI requires separate opt-in, deadline and calibrated directory profile')
     discovery.add_argument('--config', required=True, type=Path)
     discovery.add_argument('--since'); discovery.add_argument('--until')
@@ -66,6 +68,10 @@ def build_parser():
     db.add_argument('--inventory', required=True); db.add_argument('--config', required=True, type=Path)
     db.add_argument('--max-conversations', type=int, default=100); db.add_argument('--offset', type=int, default=0)
     db.add_argument('--replay', action='store_true'); db.add_argument('--expected-config-sha256')
+    cw = commands.add_parser('collect-desktop-week', help='Acquire exact bound group sources then verify fixed-window backfill; no autonomous discovery or scheduler')
+    cw.add_argument('--inventory', required=True); cw.add_argument('--config', required=True, type=Path)
+    cw.add_argument('--max-conversations', type=int, default=1); cw.add_argument('--offset', type=int, default=0)
+    cw.add_argument('--allow-ui', action='store_true'); cw.add_argument('--expected-config-sha256')
     fill = commands.add_parser('backfill-week', help='Resume fixed-window group/direct backfill from a saved inventory')
     fill.add_argument('--inventory', required=True)
     fill.add_argument('--max-conversations', type=int, default=200)
@@ -168,6 +174,9 @@ def main(argv=None):
             data = initialize(home)
         elif a.command == 'capabilities':
             data = capabilities()
+        elif a.command == 'probe-desktop-directory':
+            from .desktop_probe import probe_desktop_directory
+            data = probe_desktop_directory(a.platform)
         elif a.command == 'discover-week':
             from .activity import discover_week
             data = discover_week(home,a.config,a.since,a.until,a.days,allow_ui=a.allow_ui)
@@ -178,6 +187,10 @@ def main(argv=None):
             from .desktop_backfill import backfill_desktop_week
             data = backfill_desktop_week(home,a.inventory,a.config,a.max_conversations,a.replay,
                                          expected_config_sha256=a.expected_config_sha256,offset=a.offset)
+        elif a.command == 'collect-desktop-week':
+            from .desktop_week_collection import collect_desktop_week
+            data = collect_desktop_week(home,a.inventory,a.config,max_conversations=a.max_conversations,
+                                       offset=a.offset,allow_ui=a.allow_ui,expected_config_sha256=a.expected_config_sha256)
         elif a.command == 'backfill-week':
             from .activity import backfill_week
             data = backfill_week(home,a.inventory,a.max_conversations,a.replay)
@@ -261,6 +274,8 @@ def main(argv=None):
         if a.command == 'backfill-week' and data['failed_this_call']:
             return 4
         if a.command == 'backfill-desktop-week' and (data['failed_conversations'] or data['held_conversations'] or data['next_offset'] is not None):
+            return 4
+        if a.command == 'collect-desktop-week' and (data['held_conversations'] or data['next_offset'] is not None or data['stopped_early']):
             return 4
         if a.command == 'soak':
             return 0 if data['status']=='segment_complete' and not data['paused_sources'] and data.get('last_cycle_all_succeeded') else 4

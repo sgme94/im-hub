@@ -106,7 +106,7 @@ def verify_desktop_receipt(home: Path, folder: Path, inventory: dict,
 
 def backfill_desktop_week(home: Path, inventory_id: str, config: Path,
                           max_conversations=100, replay=False, backend=None,
-                          expected_config_sha256=None, offset=0) -> dict:
+                          expected_config_sha256=None, offset=0, upstream_fence=None) -> dict:
     """Import selected rows of explicitly pinned completed captures, with no UI.
 
     Group-only until native direct-chat identities/types are separately verified.
@@ -114,6 +114,14 @@ def backfill_desktop_week(home: Path, inventory_id: str, config: Path,
     """
     from .activity import _load, _atomic, _receipt, _save_report, week_status, _inventory_fence
     from .desktop_directory import plan_desktop_backfill
+    if upstream_fence is not None and not callable(upstream_fence):
+        raise IMError('INVALID_UPSTREAM_FENCE')
+
+    def check_upstream():
+        # Preserve the caller's original config fence across an immutable pin file.
+        if upstream_fence is not None:upstream_fence()
+
+    check_upstream()
     integer(max_conversations,'DESKTOP_BACKFILL_BOUND',1,500)
     integer(offset,'INVENTORY_PAGE_BOUND',0)
     folder,inventory=_load(home,inventory_id)
@@ -128,10 +136,12 @@ def backfill_desktop_week(home: Path, inventory_id: str, config: Path,
     _inventory_fence(folder,inventory,inventory_hash)
     output=[];new_total=0;checked=0;committed=0;held=0;failed=0
     with writer(home,lock_name='.activity.lock'):
+        check_upstream()
         _inventory_fence(folder,inventory,inventory_hash)
         if digest(read_blob(config))!=config_hash:raise IMError('DESKTOP_BINDING_CONFIG_CHANGED')
         entries={e['key']:e for e in inventory['conversations']}
         for item in plan['items']:
+            check_upstream()
             _inventory_fence(folder,inventory,inventory_hash)
             if digest(read_blob(config))!=config_hash:raise IMError('DESKTOP_BINDING_CONFIG_CHANGED')
             if not item['execution_supported']:
@@ -143,6 +153,7 @@ def backfill_desktop_week(home: Path, inventory_id: str, config: Path,
                 if (old and old.get('status')=='committed' and not replay
                         and old.get('source_config_sha256')==config_hash):
                     verified=verify_desktop_receipt(home,folder,inventory,entry,old)
+                    check_upstream()
                     checked+=verified['records'];committed+=1
                     output.append({'key':entry['key'],'status':'committed','records':verified['records'],'new_records':0,'reused_receipt':True})
                     continue
@@ -166,10 +177,13 @@ def backfill_desktop_week(home: Path, inventory_id: str, config: Path,
                          'history_complete':False,'complete_through':None,'ui_used':False,'llm_calls':0}
                 verify_desktop_receipt(home,folder,inventory,entry,receipt)
                 if digest(read_blob(config))!=config_hash:raise IMError('DESKTOP_BINDING_CONFIG_CHANGED')
+                check_upstream()
                 _atomic(folder/'results'/(entry['key']+'.json'),receipt)
                 committed+=1;checked+=imported['records'];new_total+=imported['new_records']
                 output.append({'key':entry['key'],'status':'committed','records':imported['records'],'new_records':imported['new_records']})
             except (IMError,OSError,ValueError,KeyError,TypeError) as exc:
+                # Never overwrite a prior receipt after the upstream request changed.
+                check_upstream()
                 code=exc.code if isinstance(exc,IMError) else 'DESKTOP_FIXED_WINDOW_IMPORT_FAILED'
                 if code in ('WEEK_INVENTORY_CHANGED','WEEK_INVENTORY_HASH_MISMATCH'):
                     # Preserve any committed ingest batch, but never stamp a changed inventory.
@@ -178,6 +192,7 @@ def backfill_desktop_week(home: Path, inventory_id: str, config: Path,
                     'status':'failed','entry_key':entry['key'],'error':code,'updated_at':now()})
                 failed+=1;output.append({'key':entry['key'],'status':'failed','error':code})
         _inventory_fence(folder,inventory,inventory_hash)
+        check_upstream()
         status=week_status(home,inventory_id,verify=True)
         _save_report(folder,inventory,status)
     desktop_platforms=[p for p in status['platforms'] if any('directory_enumeration_complete' in s for s in p['account_statuses'])]

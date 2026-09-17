@@ -6,6 +6,8 @@
 
 ## 当前状态
 
+**真实客户端核验与逐会话接线增量**：已增加 `probe-desktop-directory` 和 `collect-desktop-week`，后者只在身份已核实、来源已绑定时获取并按固定窗口回补；断线未知结果不会盲目再采集。恢复复核后的最终版本通过 405 项全量测试、13 项真实 ChatLab 后端合成验证；修复了未知采集结果续接位置及嵌套回补的原配置一致性检查。实际 TIM 可见目录含“群助手”，但缺少严格目录驱动要求的原生字段/计数；企微未暴露会话元数据控件。两平台普通/折叠全账号实机回补仍未完成，不启用生产采集。见[实机核验与操作说明](docs/TIM_WECOM_REAL_PROVIDER.md)及[恢复复核回执](docs/ACCEPTANCE_TIM_WECOM_RECOVERY.json)。原[400 项测试回执](docs/ACCEPTANCE_TIM_WECOM_REAL_PROVIDER.json)保留为复核前证据，不代表当前最终源码。
+
 **未发布增量候选**：新增审核式 UIA 普通/折叠目录遍历、`desktop-backfill-plan` 和 `backfill-desktop-week`。后者仅复用明确指定的已完成群聊捕获批次，支持固定窗口、真实回读和重放；不触碰客户端。TIM/企微的实际目录控件尚未校准，单聊适配和自动发现到新采集的闭环尚未通过，真实配置仍保持 `not-scanned`。详见[桌面目录候选与验收边界](docs/DESKTOP_DIRECTORY_CANDIDATE.md)。
 
 该增量候选的最终源码已通过 365 项全量测试（无跳过）及 8 项真实 ChatLab 后端合成验证；原微信/KIM 2,594 条消息只读回验通过，私有数据文件哈希未变化。此为本地工程候选验收，不是 TIM/企微账号级实机全覆盖；见[候选聚合回执](docs/ACCEPTANCE_DESKTOP_DIRECTORY_CANDIDATE.json)。

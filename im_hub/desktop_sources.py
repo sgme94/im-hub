@@ -92,6 +92,17 @@ def desktop_status(home: Path, source=None):
     finally: con.close()
 
 
+def import_window_bounds(value):
+    """An optional immutable selection window; never changes source profile identity."""
+    if value is None:return None
+    if not isinstance(value,dict) or set(value)!={'since','until_exclusive'}:
+        raise IMError('DESKTOP_IMPORT_WINDOW_REQUIRED')
+    start=iso_epoch(value['since']);end=iso_epoch(value['until_exclusive'])
+    if not 946684800<=start<end<=iso_epoch(now())+1 or end-start>31*86400:
+        raise IMError('DESKTOP_IMPORT_WINDOW_INVALID')
+    return {'since':start,'until':end}
+
+
 def _finish(home, con, run, backend):
     meta = json.loads(run['manifest_json']); rid = run['run_id']
     if not re.fullmatch(r'[0-9a-f]{32}', rid): raise IMError('INVALID_DESKTOP_RUN_ID')
@@ -99,7 +110,7 @@ def _finish(home, con, run, backend):
     extra = {'backend': backend} if backend is not None else {}
     try:
         result = ingest(home, path, meta['spec'], meta['observed_at'], since=meta.get('since'),
-                        expected_sha256=meta['sha256'], **extra)
+                        until=meta.get('until'), expected_sha256=meta['sha256'], **extra)
         with con:
             con.execute('UPDATE sources SET sequence_json=?,last_success_at=?,last_error=NULL WHERE source_id=?',
                         (canonical(meta['sequence']) if meta['sequence'] is not None else None, now(), run['source_id']))
@@ -115,7 +126,8 @@ def _finish(home, con, run, backend):
 
 
 def collect_desktop(home: Path, base: Path, source_name: str, profile: dict, dry_run=False,
-                    backend=None, allow_ui=False, after_sequence=None, driver=None):
+                    backend=None, allow_ui=False, after_sequence=None, driver=None, *, import_window=None):
+    selected_window = import_window_bounds(import_window)
     p = prepare_desktop_profile(base, profile)
     check_home(home)
     ui = p['transport'].endswith('-ui')
@@ -139,6 +151,8 @@ def collect_desktop(home: Path, base: Path, source_name: str, profile: dict, dry
             pending = con.execute("SELECT * FROM runs WHERE source_id=? AND status IN ('staged','import_failed') ORDER BY created_at", (source_name,)).fetchall()
             if len(pending) > 1: raise IMError('MULTIPLE_PENDING_DESKTOP_RUNS')
             if pending:
+                saved_window=json.loads(pending[0]['manifest_json']).get('requested_window')
+                if saved_window!=selected_window:raise IMError('PENDING_DESKTOP_WINDOW_MISMATCH')
                 return {**_finish(home, con, pending[0], backend), 'resumed_pending': True, 'ui_performed': False}
             with con: con.execute('INSERT OR IGNORE INTO sources VALUES(?,?,NULL,NULL,NULL)', (source_name, key))
             rid = uuid.uuid4().hex; folder = home / 'desktop' / rid; folder.mkdir(parents=True, mode=0o700)
@@ -163,6 +177,8 @@ def collect_desktop(home: Path, base: Path, source_name: str, profile: dict, dry
                     from .windows_desktop import acquire_ui
                     raw_blobs, acquisition = acquire_ui(p, folder, driver=driver)
                     observed = acquisition['captured_at']
+                if selected_window is not None and iso_epoch(observed)<selected_window['until']:
+                    raise IMError('DESKTOP_CAPTURE_PREDATES_WINDOW_END')
                 if not raw_blobs: raise IMError('NO_NATIVE_DATA_COLLECTED')
                 if sum(map(len, raw_blobs)) > MAX_BYTES: raise IMError('DESKTOP_CAPTURE_SIZE_LIMIT')
                 if p['platform'] == 'qq':
@@ -192,6 +208,9 @@ def collect_desktop(home: Path, base: Path, source_name: str, profile: dict, dry
                 manifest = {'spec': spec, 'observed_at': observed, 'sha256': digest(payload), 'sequence': sequence,
                             'since': iso_epoch(p['since']) if 'since' in p else None,
                             'acquisition': acquisition, 'history_complete': False}
+                if selected_window is not None:
+                    manifest.update(selected_window)
+                    manifest['requested_window']=selected_window
                 write_new(folder / 'manifest.json', canonical(manifest).encode('utf-8'))
                 with con:
                     con.execute('INSERT INTO runs VALUES(?,?,?,?,?,?,?)', (rid, source_name, 'staged', now(), None, canonical(manifest), None))

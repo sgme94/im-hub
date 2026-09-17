@@ -1,0 +1,256 @@
+{
+  "schema": "im-hub-real-provider-progression/1",
+  "observed_at": "2026-09-17T03:50:40.392075+00:00",
+  "base_commit": "727e01612917f80f349dc16a21f70502efbe87d1",
+  "code_validation_gate": "passed",
+  "real_whole_account_collection_gate": "blocked",
+  "production_activation": false,
+  "four_platform_complete": false,
+  "real_provider_probes": [
+    {
+      "platform": "qq",
+      "observed_at": "2026-09-17T03:34:54.908249+00:00",
+      "status": "visible_candidates_only",
+      "visible_rows": 13,
+      "fully_visible_rows": 12,
+      "group_helper_entries": 1,
+      "nodes_visited": 145,
+      "independent_total": null,
+      "folded_children_scanned": false,
+      "account_directory_complete": false,
+      "inventory_ready": false,
+      "ui_actions": 0,
+      "messages_collected": 0,
+      "source_version_required": false
+    },
+    {
+      "platform": "wecom",
+      "observed_at": "2026-09-17T03:34:55.016573+00:00",
+      "status": "directory_metadata_not_exposed",
+      "visible_rows": null,
+      "fully_visible_rows": null,
+      "group_helper_entries": 0,
+      "nodes_visited": 3,
+      "independent_total": null,
+      "folded_children_scanned": false,
+      "account_directory_complete": false,
+      "inventory_ready": false,
+      "ui_actions": 0,
+      "messages_collected": 0,
+      "source_version_required": false
+    }
+  ],
+  "new_commands": [
+    "probe-desktop-directory",
+    "collect-desktop-week"
+  ],
+  "implemented_changes": [
+    "passive actual-provider sidebar metadata probe with provisional labels",
+    "explicit identity-bound group acquisition then fixed-window readback",
+    "per-run half-open import window without changing source profile identity",
+    "durable pre-dispatch intent and exact returned capture correlation",
+    "unknown acquisition outcome cannot be blindly retried"
+  ],
+  "validation": {
+    "unit": {
+      "tests_run": 400,
+      "tests_passed": 400,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_unchanged": true
+    },
+    "real_backend_synthetic": {
+      "tests_run": 8,
+      "tests_passed": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_unchanged": true,
+      "synthetic_data_only": true,
+      "real_clients_accessed": false
+    },
+    "legacy_frozen_week": {
+      "observed_at": "2026-09-17T03:49:37.044203+00:00",
+      "inventory_id": "e9aa8e4059cc489b8076620bf9ee2cc2",
+      "window": {
+        "since": "2026-09-09T22:39:50+00:00",
+        "until_exclusive": "2026-09-16T22:39:50+00:00"
+      },
+      "committed_conversations": 102,
+      "committed_messages": 2594,
+      "failed_conversations": 0,
+      "query_only": true,
+      "committed_records_reverified": true,
+      "files_checked": 1406,
+      "store_bytes_unchanged": true,
+      "source_window_not_refreshed": true,
+      "ui_used": false,
+      "four_platform_complete": false
+    }
+  },
+  "diagnostic_notes": [
+    "The original actual-backend fixture cleared OS runtime variables and caused two Node startup failures; failure evidence retained. Only test environment isolation corrected; final eight cases passed.",
+    "Real TIM current sidebar lacks the strict directory candidate native-ID/time/count/scroll fields; WeCom exposes outer controls only. Generic synthetic UIA tests do not prove compatibility."
+  ],
+  "desktop_effects": {
+    "read_only_real_probes_performed": true,
+    "one_native_activation_attempt_outcome": "unconfirmed; subsequent observation still showed TIM not foreground",
+    "normal_or_folded_conversation_navigation_performed": false,
+    "new_real_message_acquisition_performed": false,
+    "old_desktop_exclusivity_renewed": false,
+    "messages_sent_or_deleted": 0
+  },
+  "remaining_gates": [
+    "current exclusive desktop interval for non-conflicting input",
+    "actual normal/folded traversal and independent denominator/identity verification",
+    "actual new conversation acquisition with verified identity mapping",
+    "typed direct-chat adapters",
+    "full fixed-window per-conversation readback and coverage"
+  ],
+  "source_sha256": {
+    "im_hub/__init__.py": "e03d61b52ee5ba7c8d8de035239095f475c4d2aa1671950a46cba64e6bcbd9ac",
+    "im_hub/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "im_hub/acquisition.py": "8e3f8558903530b93bf171bcaae6f5645168c70a87e7c6dc3294bde8ef4ae236",
+    "im_hub/activity.py": "f905c7eeb9018890020b5f2c8c0b42b3e1858fcf9e391b16d8ce6b611e5b0475",
+    "im_hub/activity_sources.py": "e9feea03e510cd8d648cb3c9b4d8208aef8cac1967b20188bd7757825d6340b7",
+    "im_hub/adapters.py": "1c832e8f2a2cf2336b0f29e2d8b6caae790ae0137559ff489b526541682296c5",
+    "im_hub/analysis.py": "eca38311d817eb93f382bb3d4b0a60603f4ff6ac0304be42aed12ce944d10fbf",
+    "im_hub/cli.py": "de7fcfd3d9cd085da904a00b5d333956f96214cdc3e9d7e2ea99e37eb618a6bb",
+    "im_hub/clipboard_snapshot.py": "c557cb0d48a347f2645bd0ab1f1b4d2a69244702f3a63c927e0a98ee881f1ba9",
+    "im_hub/codecs/__init__.py": "d0d298d8d4f10ae78493dfa76718e66c3b84ffcc9069b8f6745f61da96035806",
+    "im_hub/codecs/desktop.py": "498df7e15772eaf0a0ab938d5c971b8f2aa637bd876bc13f0b58b739deefb0e9",
+    "im_hub/codecs/qce.py": "acff41dd2c73e59b2f5f82bc0a6b9ea56eaf34b5ffadd87ea06178f1c2d0d83c",
+    "im_hub/codecs/wecom_wire.py": "8c231cc3c32b13ae4879e8ac242350d177096f4c950cd30a9297730ccb9bd78c",
+    "im_hub/collection.py": "15b078337ce4cfc97af5d750f576551b103eaca567c74ec9690e823678140b72",
+    "im_hub/common.py": "29c7523001679aeb26f90febd2628f5151ef93e36bf451456972888798e226a9",
+    "im_hub/database_readers.py": "a903dac54c1f6033d99a111e5edb94dd9b5f3edaa18ead5b2ab5051530961d94",
+    "im_hub/desktop_backfill.py": "48768d140c7bb275623a5e872c7c94f26e16290abdaf40c9b77543bcc411c81c",
+    "im_hub/desktop_directory.py": "5b520195672b2439feac65627b6f58e3761aa68219d728e19ed123a3b3afc937",
+    "im_hub/desktop_probe.py": "1a7cd51bfd2d21a334c39adf9b9013c6813192d7739411fcb370261eb17c3d1f",
+    "im_hub/desktop_runtime.py": "998b5c2a1b7dca0dbae3f0c775f7720307ab541e122e980daf35d85d1fe4ccf4",
+    "im_hub/desktop_sources.py": "c87975f12c08ff30619e312d98d77be13a3c156f4f812c62e77943e6be48dc0e",
+    "im_hub/desktop_week_collection.py": "85d4e171f7833ae3e115734129f00e7fa2cb5616e6fcc7c8f33208d8c7d54b31",
+    "im_hub/operations.py": "f5fd80d125d7e85a0eecc6b344e618a4d3d6f750c2c06fb95239ecddb37cc6ec",
+    "im_hub/query.py": "cc77c8397a7838f622e3f3d40bc774e7ba2ffb676eec29b6f0846622da36022a",
+    "im_hub/selftest.py": "d356c8135bc1b1f8a85e2a66f7474d11dcf2be6c2c5ca0f792dba36814735fbf",
+    "im_hub/soak.py": "6e39f6611e41a2966c62358f8babbcd9cef3dd1228fd51328579712233536db2",
+    "im_hub/store.py": "d241b536b28fdae8bd9b536ccdd72fb59f3d45d7a3dbf04f9056d9f79f9fbd37",
+    "im_hub/tim_sequence.py": "35c86a8972c34f094e7eb096f64208de93b81f14cfc1ca9dc5e5c97c7f017e5e",
+    "im_hub/visual_desktop.py": "0e18fa3b308b07ad1f22e9a53bd1c692df4977e153bf8e76bfaf27bb2c6b0374",
+    "im_hub/wechat_live.py": "955ee7e2eca203fd176ffd819021f21eba625c2f41ded4f1baf93b2bc9bc1cc9",
+    "im_hub/wecom_visual.py": "a34a11fc929f927c56c7bf23fca19ab97cecaa5424ded856b8dae6555c5bbed2",
+    "im_hub/windows_desktop.py": "0a393f29418fd9fa0494ed0cf2563fefec77af261520947d0cafdc91d85cb532",
+    "tests/test_activity.py": "d6038cf6b54eea97930ffcf51dcc0c9b5a73c28405519843a825ac0c5128d604",
+    "tests/test_clipboard_snapshot.py": "1dbb30a16d658fbe966de4d55befb9c97b81a995b7de45042258243632a95dc3",
+    "tests/test_collection.py": "894bfc8360857cd9004fc2635c586327a6e70cf680b2bac6258dcd0fc508cc84",
+    "tests/test_core.py": "f3b9687167fc95385c154fbb55285ae78e40857e08410db2fb9761b8ba9e38fc",
+    "tests/test_database_collection.py": "92b575cc83c6538030c5016c05f83e5444faf5ee30641e2a42a6efa25a9e43e8",
+    "tests/test_desktop_activation.py": "d5f19c468c823e99e744ff6ca502e52deda171287bf7bd4d7771975e3dc766cb",
+    "tests/test_desktop_backfill.py": "7dcc89c4c2deedc08fa363e830ff4386d7af3aa0f13145cbbe3de536f2c40656",
+    "tests/test_desktop_directory.py": "5c756049d73a89b796115823e5c08b8aae2521cd7d0b87744355661f8cbf4225",
+    "tests/test_desktop_directory_native.py": "f1070050ff4dcdc146fe9be6339248e69ddc5a222b3f0ce163998ffc9dc0489f",
+    "tests/test_desktop_probe.py": "a91fd26587050f8c9e1e7566f584e065e654a22cbc399d878011a9262a72f17a",
+    "tests/test_desktop_review_guards.py": "18e817aac7d35026f240dcff2a07816d284f61adb0d06f7b64e13e57c3e9f2b7",
+    "tests/test_desktop_week_collection.py": "307c6f401f25dcdfa2df09fa91e1accc14b59f47cf791781f3ca5b0e2108f4ce",
+    "tests/test_owned_children.py": "222815f3503af323b57cb70a7179bd0a9e7eff9ef7075c25cc5602a0446e09f4",
+    "tests/test_product.py": "623df5fef341dd7a733fce7194f504c3fd2be29ab7688b3f379ab215148d4d18",
+    "tests/test_soak.py": "34628e450e0a88e5ae00a619c011b6b6b7f33ecb797fdfb411213a95dd2cd9c4",
+    "tests/test_version_policy.py": "2b7bf0b7f410b8f7e77df4a56a946ad16d8e97bbcc56e2c72fe5db12adf79795",
+    "tests/test_visual_desktop.py": "796b45e66807e801840df504aafe507811e6f3c31cb85296955ad2371a791cb7",
+    "tests/test_wechat_live.py": "b36497e1e33b44382d81ed7441c1ffb3d00cd820f3ea2a6c25bce87a0262e76d",
+    "tests/test_wecom_visual.py": "8ddf476e291929ccd33dd3a87c6d77e797ebabc30dddf11fd1e4a11dfffb57c5"
+  },
+  "evidence": {
+    "full-suite.json": {
+      "sha256": "b0fcfeedec18a630b53c3ecaecdbf2c789d799e483cd782113562fda4aacb17d",
+      "bytes": 5418,
+      "private": false
+    },
+    "full-suite.json.log": {
+      "sha256": "d3d822e360dd828e9e8ce1f8ea377f70312b909825761c0903fd2194a1773579",
+      "bytes": 50711,
+      "private": false
+    },
+    "full-suite-reviewed.json": {
+      "sha256": "1b1391d6a986ad2e72197c016d11eb2515e0de26486df25ae9cc1c1222998d8e",
+      "bytes": 5418,
+      "private": false
+    },
+    "full-suite-reviewed.json.log": {
+      "sha256": "e199f8f3b8d20ccebfef2862fb72c2261d75d476e97a6ddb50cd4a746f85a866",
+      "bytes": 50711,
+      "private": false
+    },
+    "actual-chatlab.json": {
+      "sha256": "c9c8bf9d753da59d5d029699a9f92581a4d88efe60f52b7e067ab13bb6bc2b66",
+      "bytes": 6195,
+      "private": false
+    },
+    "actual-chatlab.json.log": {
+      "sha256": "5d68831c114334664428d9abab68aee41a8579c9e19f49593e8ae6ad1b38afa1",
+      "bytes": 2978,
+      "private": false
+    },
+    "actual-chatlab-reviewed.json": {
+      "sha256": "a13b7a52be269fe5e7e4ec6f5f21058ecee5e4926a1d7bb1a666d67656de5b78",
+      "bytes": 6377,
+      "private": false
+    },
+    "actual-chatlab-reviewed.json.log": {
+      "sha256": "325b9d5f8834f0b5cc068044a42f36e91ba5653f53290ecb75d9a0afb42ba7a6",
+      "bytes": 1538,
+      "private": false
+    },
+    "legacy-week-regression.json": {
+      "sha256": "475656a27690aeae620efec8ef0cf1b45144a52d6d958dd545e88b08d8ee4b3c",
+      "bytes": 545,
+      "private": false
+    },
+    "prior-sample-capture-readback.json": {
+      "sha256": "115df71bf5d9dfbb16d8e29e8a2483b28e79b5b99ed88c58e9655937637bab13",
+      "bytes": 1477,
+      "private": false
+    },
+    "qq-readonly-probe.json": {
+      "sha256": "edd2169b9f8a9182362992d8f5b6d5d0655de59737badabb14971f58b57a2e03",
+      "bytes": 7588,
+      "private": true
+    },
+    "wecom-readonly-probe.json": {
+      "sha256": "1951a904b4ff8cb50c2d3880549f10b3ed2ad59a9685682da77fb9ac9b94c19f",
+      "bytes": 870,
+      "private": true
+    },
+    "native-observation.json": {
+      "sha256": "d046fc5183c8606116a5eee79d1171292f96dbf7540dcf43da8d46d626ba9cdd",
+      "bytes": 802,
+      "private": true
+    },
+    "native-controls.json": {
+      "sha256": "d318c3116f6edcf032bc1390cc28a99207b836c928450c2a1737eccb0a77fe60",
+      "bytes": 7993,
+      "private": true
+    },
+    "tim-sidebar-native.json": {
+      "sha256": "77ef266dab2db83a15f7c5036e0d043138672093bd14273cf736ffb3069c9694",
+      "bytes": 5369,
+      "private": true
+    },
+    "tim-row-probe.json": {
+      "sha256": "c119e43af4e1c0c6bd4b4eac72b33f1b6bf20dc5f09e25a572987086bdac0da5",
+      "bytes": 6361,
+      "private": true
+    },
+    "qq-native-full.png": {
+      "sha256": "7d66be83fc85c19ea1f55619df206ef573d11e33e8df4ed14686ab0f7c014911",
+      "bytes": 443347,
+      "private": true
+    },
+    "wecom-native-full.png": {
+      "sha256": "36935feaee8d1e88304839e67aac66d986d487370ada9df50781d624f8254960",
+      "bytes": 662820,
+      "private": true
+    }
+  }
+}
