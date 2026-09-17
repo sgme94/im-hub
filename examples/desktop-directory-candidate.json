@@ -1,0 +1,169 @@
+{
+  "schema": "im-hub-active-accounts/1",
+  "accounts": {
+    "qq": {
+      "platform": "qq",
+      "enabled": false,
+      "transport": "desktop-directory",
+      "account_namespace": "synthetic-account",
+      "source_epoch": "synthetic-generation",
+      "data_class": "synthetic",
+      "include_types": [
+        "group",
+        "direct"
+      ],
+      "directory": {
+        "schema": "im-hub-directory-profile/1",
+        "profile_reviewed": true,
+        "identity_source": "native_conversation_id_text",
+        "window": {
+          "automation_id": "fixture-window",
+          "control_type": "WindowControl"
+        },
+        "account_header": {
+          "name": "Synthetic account",
+          "control_type": "TextControl"
+        },
+        "row_control_type": "ListItemControl",
+        "fields": {
+          "native_id": {
+            "automation_id": "native_id",
+            "control_type": "TextControl"
+          },
+          "name": {
+            "automation_id": "name",
+            "control_type": "TextControl"
+          },
+          "type_label": {
+            "automation_id": "type_label",
+            "control_type": "TextControl"
+          },
+          "last_activity": {
+            "automation_id": "last_activity",
+            "control_type": "TextControl"
+          }
+        },
+        "type_labels": {
+          "GROUP": "group",
+          "DIRECT": "direct",
+          "SERVICE": "service"
+        },
+        "time_format": "iso8601",
+        "max_pages": 10,
+        "max_rows": 100,
+        "sections": [
+          {
+            "id": "regular",
+            "kind": "regular",
+            "listing": {
+              "automation_id": "regular-list",
+              "control_type": "ListControl"
+            },
+            "total_count": {
+              "automation_id": "regular-count",
+              "control_type": "TextControl"
+            }
+          },
+          {
+            "id": "folded",
+            "kind": "folded",
+            "listing": {
+              "automation_id": "folded-list",
+              "control_type": "ListControl"
+            },
+            "total_count": {
+              "automation_id": "folded-count",
+              "control_type": "TextControl"
+            },
+            "expand": {
+              "automation_id": "folded-folder",
+              "control_type": "TreeItemControl"
+            }
+          }
+        ]
+      }
+    },
+    "wecom": {
+      "platform": "wecom",
+      "enabled": false,
+      "transport": "desktop-directory",
+      "account_namespace": "synthetic-account",
+      "source_epoch": "synthetic-generation",
+      "data_class": "synthetic",
+      "include_types": [
+        "group",
+        "direct"
+      ],
+      "directory": {
+        "schema": "im-hub-directory-profile/1",
+        "profile_reviewed": true,
+        "identity_source": "native_conversation_id_text",
+        "window": {
+          "automation_id": "fixture-window",
+          "control_type": "WindowControl"
+        },
+        "account_header": {
+          "name": "Synthetic account",
+          "control_type": "TextControl"
+        },
+        "row_control_type": "ListItemControl",
+        "fields": {
+          "native_id": {
+            "automation_id": "native_id",
+            "control_type": "TextControl"
+          },
+          "name": {
+            "automation_id": "name",
+            "control_type": "TextControl"
+          },
+          "type_label": {
+            "automation_id": "type_label",
+            "control_type": "TextControl"
+          },
+          "last_activity": {
+            "automation_id": "last_activity",
+            "control_type": "TextControl"
+          }
+        },
+        "type_labels": {
+          "GROUP": "group",
+          "DIRECT": "direct",
+          "SERVICE": "service"
+        },
+        "time_format": "iso8601",
+        "max_pages": 10,
+        "max_rows": 100,
+        "sections": [
+          {
+            "id": "regular",
+            "kind": "regular",
+            "listing": {
+              "automation_id": "regular-list",
+              "control_type": "ListControl"
+            },
+            "total_count": {
+              "automation_id": "regular-count",
+              "control_type": "TextControl"
+            }
+          },
+          {
+            "id": "folded",
+            "kind": "folded",
+            "listing": {
+              "automation_id": "folded-list",
+              "control_type": "ListControl"
+            },
+            "total_count": {
+              "automation_id": "folded-count",
+              "control_type": "TextControl"
+            },
+            "expand": {
+              "automation_id": "folded-folder",
+              "control_type": "TreeItemControl"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

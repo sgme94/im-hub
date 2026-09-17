@@ -6,6 +6,10 @@
 
 ## 当前状态
 
+**未发布增量候选**：新增审核式 UIA 普通/折叠目录遍历、`desktop-backfill-plan` 和 `backfill-desktop-week`。后者仅复用明确指定的已完成群聊捕获批次，支持固定窗口、真实回读和重放；不触碰客户端。TIM/企微的实际目录控件尚未校准，单聊适配和自动发现到新采集的闭环尚未通过，真实配置仍保持 `not-scanned`。详见[桌面目录候选与验收边界](docs/DESKTOP_DIRECTORY_CANDIDATE.md)。
+
+该增量候选的最终源码已通过 365 项全量测试（无跳过）及 8 项真实 ChatLab 后端合成验证；原微信/KIM 2,594 条消息只读回验通过，私有数据文件哈希未变化。此为本地工程候选验收，不是 TIM/企微账号级实机全覆盖；见[候选聚合回执](docs/ACCEPTANCE_DESKTOP_DIRECTORY_CANDIDATE.json)。
+
 **`1.1.0a1` 新增账号级最近七天活跃群聊＋单聊发现、固定窗口回补和逐会话覆盖清单。** 微信原生会话/联系人索引与消息分片、KIM 原生 session/group/user/message 联合扫描，不按隐藏/免打扰/已读过滤。`discover-week → backfill-week → week-status --verify` 可通过 CLI 调用。TIM/企微的全账号会话发现仍标 `not_scanned`，不是空结果；当前新能力只对微信/KIM有实机证据。见[活跃会话采集](docs/ACTIVE_WEEK.md)。旧 RC4 的四路数字来自每路一个样本群，不代表账号全会话覆盖。
 
 该账号级回补已完成并在恢复连接后重新核验：微信 89 个会话（54 群/35 单聊）2,502 条，KIM/OA 13 个会话（5 群/8 单聊）92 条，共 2,594 条；重放新增 0，1,178 条微信压缩正文解码。294 项测试通过，未扫描渠道及富媒体缺口仍保留，详见[聚合验收回执](docs/ACCEPTANCE_ACTIVE_WEEK.json)。

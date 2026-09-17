@@ -42,15 +42,20 @@ def prepare_accounts(config: Path) -> tuple[dict, str]:
         label(p.get('account_namespace')); label(p.get('source_epoch'))
         if p.get('data_class') not in ('real', 'synthetic'):
             raise IMError('INVALID_DATA_CLASS')
-        if p.get('transport') != ACCOUNT_KINDS[platform]:
+        desktop_directory = platform in ('qq','wecom') and p.get('transport') == 'desktop-directory'
+        if p.get('transport') != ACCOUNT_KINDS[platform] and not desktop_directory:
             raise IMError('ACTIVE_ACCOUNT_TRANSPORT_UNSUPPORTED')
         if p.get('include_types') != ['group', 'direct']:
             raise IMError('ACTIVE_GROUP_AND_DIRECT_SCOPE_REQUIRED')
         p['timeout_seconds'] = integer(p.get('timeout_seconds',30), 'INVALID_QUERY_TIMEOUT', 1, 120)
         p['max_messages_per_conversation'] = integer(p.get('max_messages_per_conversation',20000), 'INVALID_RECORD_LIMIT', 1, MESSAGE_LIMIT)
         if platform in ('qq','wecom'):
-            # An unscanned account is a visible coverage gap, never an empty success.
-            p['reason'] = 'NATIVE_CONVERSATION_DIRECTORY_DRIVER_NOT_IMPLEMENTED_NO_GUI_RUN'
+            if desktop_directory:
+                from .desktop_directory import validate_directory_profile
+                p['directory'] = validate_directory_profile(p.get('directory'))
+            else:
+                # Existing explicit not-scanned configs stay unscanned; never auto-enable UI.
+                p['reason'] = 'NATIVE_CONVERSATION_DIRECTORY_DRIVER_NOT_IMPLEMENTED_NO_GUI_RUN'
         else:
             account = local_path(config.parent, p.get('account_directory'))
             p['account_directory'] = str(account)

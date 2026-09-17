@@ -22,6 +22,13 @@ def capabilities() -> dict:
         'active_account_discovery': {'implemented_platforms': ['wechat','kim'], 'pending_platforms': ['qq','wecom'],
                                      'conversation_types': ['group','direct'], 'commands': ['discover-week','backfill-week','week-status'],
                                      'fixed_window': True, 'gui_used': False, 'full_four_platform_coverage': False},
+        'desktop_account_directory_candidate': {'platforms':['qq','wecom'], 'native_driver':'reviewed_uia_metadata_fields',
+                                                'implemented':True, 'real_client_calibration_verified':False,
+                                                'explicit_ui_and_deadline_required':True, 'activates_clients':False,
+                                                'metadata_only':True, 'live_directory_to_capture_integrated':False,
+                                                'pinned_group_capture_window_reuse':True, 'direct_chat_capture_adapter':False,
+                                                'plan_command':'desktop-backfill-plan', 'reuse_command':'backfill-desktop-week',
+                                                'full_four_platform_coverage':False},
         'live_database_readers': ['kim-sqlite', 'wechat-live'], 'plaintext_cache_readers': ['wechat-sqlite'],
         'recoverable_acquisition_batches': True, 'collection_checkpoint_status': True,
         'platforms': {

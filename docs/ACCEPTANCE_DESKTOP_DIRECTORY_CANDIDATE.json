@@ -1,0 +1,164 @@
+{
+  "schema": "im-hub-candidate-acceptance/1",
+  "candidate_id": "desktop-directory-pinned-capture-20260917-e940",
+  "observed_at": "2026-09-17T02:59:00.470199+00:00",
+  "base_commit": "121433f43d9a80f339f9d05b900d466f82e511bb",
+  "local_engineering_gate": "passed",
+  "production_activation": false,
+  "release_published": false,
+  "four_platform_complete": false,
+  "implemented": [
+    "opt-in reviewed UIA regular/folded directory metadata traversal",
+    "read-only exact native identity binding plan",
+    "reuse pinned committed TIM/WeCom group captures in a frozen half-open window",
+    "original ingest/readback transaction and replay without new acquisition",
+    "page-bounded capture checking and immutable inventory/configuration fencing",
+    "strict receipt numeric types and partial-history invariants"
+  ],
+  "validation": {
+    "unit": {
+      "tests_run": 365,
+      "tests_passed": 365,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_unchanged_during_tests": true
+    },
+    "actual_backend": {
+      "tests_run": 8,
+      "tests_passed": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_unchanged_during_test": true,
+      "backend": {
+        "installed_version": "0.37.1",
+        "required_version": "0.37.1",
+        "node_available": true,
+        "offline_guard_available": true,
+        "ready": true
+      },
+      "synthetic_only": true,
+      "real_im_clients_accessed": false
+    },
+    "existing_week": {
+      "window": {
+        "since": "2026-09-09T22:39:50+00:00",
+        "until_exclusive": "2026-09-16T22:39:50+00:00"
+      },
+      "committed_conversations": 102,
+      "committed_messages": 2594,
+      "failed_conversations": 0,
+      "store_files_hashed": 1406,
+      "store_bytes_unchanged": true,
+      "query_only": true,
+      "original_source_window_not_refreshed": true
+    },
+    "same_final_python_snapshot": true
+  },
+  "source_sha256": {
+    "im_hub/__init__.py": "e03d61b52ee5ba7c8d8de035239095f475c4d2aa1671950a46cba64e6bcbd9ac",
+    "im_hub/__main__.py": "79ee6f134c5c5193377cf9b189cbdcc3e2095e49ba9cec310114441c15a917c4",
+    "im_hub/acquisition.py": "8e3f8558903530b93bf171bcaae6f5645168c70a87e7c6dc3294bde8ef4ae236",
+    "im_hub/activity.py": "f905c7eeb9018890020b5f2c8c0b42b3e1858fcf9e391b16d8ce6b611e5b0475",
+    "im_hub/activity_sources.py": "e9feea03e510cd8d648cb3c9b4d8208aef8cac1967b20188bd7757825d6340b7",
+    "im_hub/adapters.py": "1c832e8f2a2cf2336b0f29e2d8b6caae790ae0137559ff489b526541682296c5",
+    "im_hub/analysis.py": "eca38311d817eb93f382bb3d4b0a60603f4ff6ac0304be42aed12ce944d10fbf",
+    "im_hub/cli.py": "ba1d46c17f59e6dbba088732a8455e56ad326727e968e5d19479f5fb2668311a",
+    "im_hub/clipboard_snapshot.py": "c557cb0d48a347f2645bd0ab1f1b4d2a69244702f3a63c927e0a98ee881f1ba9",
+    "im_hub/codecs/__init__.py": "d0d298d8d4f10ae78493dfa76718e66c3b84ffcc9069b8f6745f61da96035806",
+    "im_hub/codecs/desktop.py": "498df7e15772eaf0a0ab938d5c971b8f2aa637bd876bc13f0b58b739deefb0e9",
+    "im_hub/codecs/qce.py": "acff41dd2c73e59b2f5f82bc0a6b9ea56eaf34b5ffadd87ea06178f1c2d0d83c",
+    "im_hub/codecs/wecom_wire.py": "8c231cc3c32b13ae4879e8ac242350d177096f4c950cd30a9297730ccb9bd78c",
+    "im_hub/collection.py": "6dc087669e3f97ff2fe8fc8b030078088682252fdce385f0aaa3323378203826",
+    "im_hub/common.py": "29c7523001679aeb26f90febd2628f5151ef93e36bf451456972888798e226a9",
+    "im_hub/database_readers.py": "a903dac54c1f6033d99a111e5edb94dd9b5f3edaa18ead5b2ab5051530961d94",
+    "im_hub/desktop_backfill.py": "48768d140c7bb275623a5e872c7c94f26e16290abdaf40c9b77543bcc411c81c",
+    "im_hub/desktop_directory.py": "5b520195672b2439feac65627b6f58e3761aa68219d728e19ed123a3b3afc937",
+    "im_hub/desktop_runtime.py": "998b5c2a1b7dca0dbae3f0c775f7720307ab541e122e980daf35d85d1fe4ccf4",
+    "im_hub/desktop_sources.py": "78d165c3630eabea9725edf4f349216936c1ce152154db1884f1538deb7485ae",
+    "im_hub/operations.py": "f5fd80d125d7e85a0eecc6b344e618a4d3d6f750c2c06fb95239ecddb37cc6ec",
+    "im_hub/query.py": "cc77c8397a7838f622e3f3d40bc774e7ba2ffb676eec29b6f0846622da36022a",
+    "im_hub/selftest.py": "d356c8135bc1b1f8a85e2a66f7474d11dcf2be6c2c5ca0f792dba36814735fbf",
+    "im_hub/soak.py": "6e39f6611e41a2966c62358f8babbcd9cef3dd1228fd51328579712233536db2",
+    "im_hub/store.py": "d241b536b28fdae8bd9b536ccdd72fb59f3d45d7a3dbf04f9056d9f79f9fbd37",
+    "im_hub/tim_sequence.py": "35c86a8972c34f094e7eb096f64208de93b81f14cfc1ca9dc5e5c97c7f017e5e",
+    "im_hub/visual_desktop.py": "0e18fa3b308b07ad1f22e9a53bd1c692df4977e153bf8e76bfaf27bb2c6b0374",
+    "im_hub/wechat_live.py": "955ee7e2eca203fd176ffd819021f21eba625c2f41ded4f1baf93b2bc9bc1cc9",
+    "im_hub/wecom_visual.py": "a34a11fc929f927c56c7bf23fca19ab97cecaa5424ded856b8dae6555c5bbed2",
+    "im_hub/windows_desktop.py": "0a393f29418fd9fa0494ed0cf2563fefec77af261520947d0cafdc91d85cb532",
+    "tests/test_activity.py": "d6038cf6b54eea97930ffcf51dcc0c9b5a73c28405519843a825ac0c5128d604",
+    "tests/test_clipboard_snapshot.py": "1dbb30a16d658fbe966de4d55befb9c97b81a995b7de45042258243632a95dc3",
+    "tests/test_collection.py": "894bfc8360857cd9004fc2635c586327a6e70cf680b2bac6258dcd0fc508cc84",
+    "tests/test_core.py": "f3b9687167fc95385c154fbb55285ae78e40857e08410db2fb9761b8ba9e38fc",
+    "tests/test_database_collection.py": "92b575cc83c6538030c5016c05f83e5444faf5ee30641e2a42a6efa25a9e43e8",
+    "tests/test_desktop_activation.py": "d5f19c468c823e99e744ff6ca502e52deda171287bf7bd4d7771975e3dc766cb",
+    "tests/test_desktop_backfill.py": "7dcc89c4c2deedc08fa363e830ff4386d7af3aa0f13145cbbe3de536f2c40656",
+    "tests/test_desktop_directory.py": "5c756049d73a89b796115823e5c08b8aae2521cd7d0b87744355661f8cbf4225",
+    "tests/test_desktop_directory_native.py": "f1070050ff4dcdc146fe9be6339248e69ddc5a222b3f0ce163998ffc9dc0489f",
+    "tests/test_desktop_review_guards.py": "18e817aac7d35026f240dcff2a07816d284f61adb0d06f7b64e13e57c3e9f2b7",
+    "tests/test_owned_children.py": "222815f3503af323b57cb70a7179bd0a9e7eff9ef7075c25cc5602a0446e09f4",
+    "tests/test_product.py": "623df5fef341dd7a733fce7194f504c3fd2be29ab7688b3f379ab215148d4d18",
+    "tests/test_soak.py": "34628e450e0a88e5ae00a619c011b6b6b7f33ecb797fdfb411213a95dd2cd9c4",
+    "tests/test_version_policy.py": "2b7bf0b7f410b8f7e77df4a56a946ad16d8e97bbcc56e2c72fe5db12adf79795",
+    "tests/test_visual_desktop.py": "796b45e66807e801840df504aafe507811e6f3c31cb85296955ad2371a791cb7",
+    "tests/test_wechat_live.py": "b36497e1e33b44382d81ed7441c1ffb3d00cd820f3ea2a6c25bce87a0262e76d",
+    "tests/test_wecom_visual.py": "8ddf476e291929ccd33dd3a87c6d77e797ebabc30dddf11fd1e4a11dfffb57c5"
+  },
+  "evidence_reports": {
+    "full-suite.json": {
+      "sha256": "368bdc654586d700f14cbeae29b41c2fe2b9c21f3c0a4f6f00ce9be3fbeacf56",
+      "bytes": 4974
+    },
+    "full-suite.log": {
+      "sha256": "bf921e43a4922ed2fd5e445702789771d8d14bd9d728f7845640d9b77f74380a",
+      "bytes": 44091
+    },
+    "full-suite-reviewed.json": {
+      "sha256": "b752d7330e77d70a3f449b0a11a885ca20c09829eb601c6bcf9b702e70e8be3f",
+      "bytes": 5086
+    },
+    "full-suite-reviewed.log": {
+      "sha256": "3c4d82063f70f8e62b42f6b3243e044aa595cffc5a9d16ada8e012f8898261f3",
+      "bytes": 45417
+    },
+    "actual-chatlab-smoke.json": {
+      "sha256": "00eb25f980dd3b0d55f604886bb696a8e148ec7f90f35b4de68ec6f70b330fe9",
+      "bytes": 5819
+    },
+    "actual-chatlab-smoke.log": {
+      "sha256": "5a18f89cd81514647fb55c27134340a200eb5a9ad2df54bca5a5c3195d5509b9",
+      "bytes": 1302
+    },
+    "actual-chatlab-reviewed.json": {
+      "sha256": "a7449b4c14417546760dcf59ec9c191b7bb70757006537896896374378c9ce2e",
+      "bytes": 5932
+    },
+    "actual-chatlab-reviewed.log": {
+      "sha256": "8d0a77c3cd2f7af76595232a1b349832c737423ae839d95ffd86c333b314d6a8",
+      "bytes": 1302
+    },
+    "legacy-week-readback-reviewed.json": {
+      "sha256": "7443bdf4fc54222deb087f964e9db417c08415c83f1a66a8fc48ddeca5b195e6",
+      "bytes": 2796
+    }
+  },
+  "required_external_or_unimplemented_gates": [
+    "new explicit desktop authorization; old exclusive window is not renewed",
+    "real TIM/WeCom native directory field and independent count calibration",
+    "whole-account regular/folded denominator verification",
+    "acquisition/binding of previously uncaptured conversations",
+    "typed TIM/WeCom direct-chat capture adapters",
+    "same-window whole-account backfill and natural-message continuous collection acceptance"
+  ],
+  "scope_preservation": {
+    "real_im_client_ui_used": false,
+    "existing_real_account_configs_edited": false,
+    "credentials_or_process_memory_extracted": false,
+    "new_schedules": 0,
+    "mandatory_llm_added": false,
+    "mymind_workevents_or_canonical_written": false,
+    "raw_history_deleted": false,
+    "four_platform_complete_claimed": false
+  }
+}

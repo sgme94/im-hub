@@ -53,10 +53,19 @@ def build_parser():
     commands.add_parser('init', help='Create a dedicated private ChatLab/provenance home')
     commands.add_parser('doctor', help='Check pinned local dependency; never install or log in')
     commands.add_parser('capabilities', help='Report implemented and pending capabilities; no client access')
-    discovery = commands.add_parser('discover-week', help='Discover active groups/direct chats in explicit native accounts; no GUI, bodies or background work')
+    discovery = commands.add_parser('discover-week', help='Discover explicit account metadata; GUI requires separate opt-in, deadline and calibrated directory profile')
     discovery.add_argument('--config', required=True, type=Path)
     discovery.add_argument('--since'); discovery.add_argument('--until')
     discovery.add_argument('--days', type=int, default=7)
+    discovery.add_argument('--allow-ui', action='store_true', help='Opt in to reviewed TIM/WeCom directory traversal; requires IM_HUB_DESKTOP_UNTIL and current foreground client')
+    dp = commands.add_parser('desktop-backfill-plan', help='Read-only identity-bound plan; never opens clients or executes collection')
+    dp.add_argument('--inventory', required=True)
+    dp.add_argument('--config', type=Path)
+    dp.add_argument('--limit', type=int, default=100); dp.add_argument('--offset', type=int, default=0)
+    db = commands.add_parser('backfill-desktop-week', help='Reuse pinned completed group captures in the frozen inventory window; no UI or acquisition')
+    db.add_argument('--inventory', required=True); db.add_argument('--config', required=True, type=Path)
+    db.add_argument('--max-conversations', type=int, default=100); db.add_argument('--offset', type=int, default=0)
+    db.add_argument('--replay', action='store_true'); db.add_argument('--expected-config-sha256')
     fill = commands.add_parser('backfill-week', help='Resume fixed-window group/direct backfill from a saved inventory')
     fill.add_argument('--inventory', required=True)
     fill.add_argument('--max-conversations', type=int, default=200)
@@ -161,7 +170,14 @@ def main(argv=None):
             data = capabilities()
         elif a.command == 'discover-week':
             from .activity import discover_week
-            data = discover_week(home,a.config,a.since,a.until,a.days)
+            data = discover_week(home,a.config,a.since,a.until,a.days,allow_ui=a.allow_ui)
+        elif a.command == 'desktop-backfill-plan':
+            from .desktop_directory import plan_desktop_backfill
+            data = plan_desktop_backfill(home,a.inventory,a.config,a.limit,a.offset)
+        elif a.command == 'backfill-desktop-week':
+            from .desktop_backfill import backfill_desktop_week
+            data = backfill_desktop_week(home,a.inventory,a.config,a.max_conversations,a.replay,
+                                         expected_config_sha256=a.expected_config_sha256,offset=a.offset)
         elif a.command == 'backfill-week':
             from .activity import backfill_week
             data = backfill_week(home,a.inventory,a.max_conversations,a.replay)
@@ -243,6 +259,8 @@ def main(argv=None):
             raise IMError('UNKNOWN_COMMAND')
         print(json.dumps({'ok': True, 'command': a.command, 'data': data}, ensure_ascii=False, allow_nan=False))
         if a.command == 'backfill-week' and data['failed_this_call']:
+            return 4
+        if a.command == 'backfill-desktop-week' and (data['failed_conversations'] or data['held_conversations'] or data['next_offset'] is not None):
             return 4
         if a.command == 'soak':
             return 0 if data['status']=='segment_complete' and not data['paused_sources'] and data.get('last_cycle_all_succeeded') else 4

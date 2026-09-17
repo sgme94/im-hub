@@ -1,7 +1,7 @@
 """Frozen-week conversation inventory, resumable backfill and honest coverage.
 Discovery is metadata-only. Backfill explicitly persists authorized group/direct
 messages; other categories and unscanned platforms are never silently counted as
-complete. This module never opens GUI, calls a model, or starts background work.
+complete. GUI discovery is opt-in and deadline-bound; no model or background work.
 """
 from __future__ import annotations
 import html
@@ -42,13 +42,25 @@ def _load(home, inventory_id):
     return folder,data
 
 
+def _inventory_fence(folder, data, expected_sha256=None):
+    """Bind multi-stage readers to the same verified immutable inventory."""
+    raw=read_blob(folder/'inventory.json');current=digest(raw)
+    declared=(folder/'inventory.sha256').read_text('ascii').strip()
+    if current!=declared:raise IMError('WEEK_INVENTORY_HASH_MISMATCH')
+    if expected_sha256 is not None:
+        if current!=expected_sha256:raise IMError('WEEK_INVENTORY_CHANGED')
+    elif load_json(raw)!=data:
+        raise IMError('WEEK_INVENTORY_CHANGED')
+    return current
+
+
 def _receipt(folder,key):
     if not re.fullmatch(r'[0-9a-f]{64}',key):raise IMError('INVALID_CONVERSATION_KEY')
     path=folder/'results'/(key+'.json')
     return load_json(read_blob(path)) if path.is_file() else None
 
 
-def discover_week(home: Path, config: Path, since=None, until=None, days=7, snapshotter=account_snapshot) -> dict:
+def discover_week(home: Path, config: Path, since=None, until=None, days=7, snapshotter=account_snapshot, *, allow_ui=False) -> dict:
     check_home(home)
     if isinstance(days,bool) or not isinstance(days,int) or not 1<=days<=31:raise IMError('DISCOVERY_DAYS_MUST_BE_1_TO_31')
     end=int(iso_epoch(until)) if until is not None else int(iso_epoch(now()))
@@ -66,10 +78,15 @@ def discover_week(home: Path, config: Path, since=None, until=None, days=7, snap
             if p['transport']=='not-scanned':
                 summaries[name]={**base,'status':'not_scanned','error':p['reason'],'discovered_conversations':None};continue
             try:
-                with snapshotter(p,home) as sources:items,summary=discover_account(p,sources,start,end)
+                if p['transport']=='desktop-directory':
+                    from .desktop_directory import discover_desktop_account
+                    items,summary=discover_desktop_account(p,start,end,allow_ui=allow_ui)
+                else:
+                    with snapshotter(p,home) as sources:items,summary=discover_account(p,sources,start,end)
+                    summary={**summary,'status':'scanned_local_scope'}
                 for e in items:e['account_key']=name
                 entries.extend(items)
-                summaries[name]={**base,**summary,'status':'scanned_local_scope','discovered_conversations':len(items)}
+                summaries[name]={**base,**summary,'discovered_conversations':len(items)}
             except (IMError,OSError,ValueError,TypeError,KeyError) as exc:
                 summaries[name]={**base,'status':'failed','error':exc.code if isinstance(exc,IMError) else 'LOCAL_DISCOVERY_FAILED_'+type(exc).__name__,
                                  'discovered_conversations':None}
@@ -80,7 +97,7 @@ def discover_week(home: Path, config: Path, since=None, until=None, days=7, snap
               'window':{'since':stamp(start),'until_exclusive':stamp(end)},
               'config_sha256':config_hash,'accounts':accounts,'account_results':summaries,
               'conversations':sorted(entries,key=lambda e:(e['platform'],e['conversation_type'],e['key'])),
-              'message_bodies_collected':False,'ui_used':False,'source_versions_required':False,
+              'message_bodies_collected':False,'ui_used':any(s.get('ui_used',False) for s in summaries.values()),'source_versions_required':False,
               'classification_policy':'group_and_direct_only; service_and_unknown_are_separate',
               'all_platform_discovery_complete':False,'server_history_complete':False}
         blob=canonical(data).encode('utf-8');write_new(folder/'inventory.json',blob)
@@ -88,6 +105,7 @@ def discover_week(home: Path, config: Path, since=None, until=None, days=7, snap
         result=week_status(home,identifier)
         # Discovery persists an inventory/report; it is not a read-only query.
         result['query_only']=False
+        result['ui_used']=data['ui_used']
         _save_report(folder,data,result)
         return result
 
@@ -236,7 +254,9 @@ def week_status(home,inventory_id,details=False,limit=100,offset=0,verify=False)
     entries=[];platforms={k:{'platform':k,'account_statuses':[],'confirmed_groups':0,'confirmed_direct':0,
                             'service_conversations':0,'unknown_conversations':0,'directory_only_candidates':0,
                             'eligible_conversations':0,'expected_local_messages':0,'committed_conversations':0,
-                            'committed_messages':0,'pending_conversations':0,'failed_conversations':0,'body_gap_records':0}
+                            'committed_messages':0,'pending_conversations':0,'failed_conversations':0,'body_gap_records':0,
+                            'directory_group_candidates':0,'directory_direct_candidates':0,'directory_time_unknown':0,
+                            'desktop_captured_conversations':0,'desktop_captured_messages':0,'desktop_capture_failures':0}
                         for k in ('wechat','kim','qq','wecom')}
     for account_key,summary in data['account_results'].items():
         platforms[summary['platform']]['account_statuses'].append({'account_key':account_key,**summary})
@@ -246,6 +266,9 @@ def week_status(home,inventory_id,details=False,limit=100,offset=0,verify=False)
         if typ=='service':ps['service_conversations']+=1
         if typ=='unknown':ps['unknown_conversations']+=1
         if e['activity']=='directory_candidate':ps['directory_only_candidates']+=1
+        if e.get('source_kind')=='desktop_directory_metadata' and e['activity']=='directory_candidate':
+            if typ in ('group','direct'):ps['directory_'+typ+'_candidates']+=1
+            if e.get('directory_last_epoch') is None:ps['directory_time_unknown']+=1
         error=None
         if e['eligible']:
             ps['eligible_conversations']+=1;ps['expected_local_messages']+=e['local_message_count']
@@ -274,10 +297,23 @@ def week_status(home,inventory_id,details=False,limit=100,offset=0,verify=False)
                 ps['committed_conversations']+=1;ps['committed_messages']+=receipt['records'];ps['body_gap_records']+=receipt.get('body_gap_records',0)
             elif state=='failed':ps['failed_conversations']+=1
             else:ps['pending_conversations']+=1
+        if e.get('source_kind')=='desktop_directory_metadata' and receipt:
+            state=receipt.get('status','failed');error=receipt.get('error')
+            if state=='committed':
+                try:
+                    from .desktop_backfill import verify_desktop_receipt
+                    checked=verify_desktop_receipt(home,folder,data,e,receipt)
+                    ps['desktop_captured_conversations']+=1;ps['desktop_captured_messages']+=checked['records']
+                except (IMError,OSError,ValueError,KeyError,TypeError) as exc:
+                    state='failed';error=exc.code if isinstance(exc,IMError) else 'DESKTOP_CAPTURE_READBACK_FAILED'
+            if state=='failed':ps['desktop_capture_failures']+=1
         entries.append({k:e[k] for k in ('key','platform','conversation_type','conversation_id','conversation_name','activity','local_message_count','message_min_epoch','message_max_epoch','presentation_flags','folded_state','coverage_gaps')}|{'backfill_status':state,'error':error})
     for ps in platforms.values():
         ps['eligible_local_backfill_complete']=(bool(ps['account_statuses']) and all(s['status']=='scanned_local_scope' for s in ps['account_statuses']) and ps['pending_conversations']==0 and ps['failed_conversations']==0)
         ps['full_channel_coverage_verified']=False
+        directory_scopes=[s for s in ps['account_statuses'] if 'directory_enumeration_complete' in s]
+        ps['directory_enumeration_complete']=(bool(directory_scopes) and len(directory_scopes)==len(ps['account_statuses'])
+                                              and all(s['directory_enumeration_complete'] for s in directory_scopes))
     result={'inventory_id':inventory_id,'window':data['window'],'platforms':list(platforms.values()),
             'eligible_conversations':sum(x['eligible_conversations'] for x in platforms.values()),
             'expected_local_messages':sum(x['expected_local_messages'] for x in platforms.values()),
@@ -285,6 +321,9 @@ def week_status(home,inventory_id,details=False,limit=100,offset=0,verify=False)
             'committed_messages':sum(x['committed_messages'] for x in platforms.values()),
             'pending_conversations':sum(x['pending_conversations'] for x in platforms.values()),
             'failed_conversations':sum(x['failed_conversations'] for x in platforms.values()),
+            'desktop_captured_conversations':sum(x['desktop_captured_conversations'] for x in platforms.values()),
+            'desktop_captured_messages':sum(x['desktop_captured_messages'] for x in platforms.values()),
+            'desktop_capture_failures':sum(x['desktop_capture_failures'] for x in platforms.values()),
             'four_platform_complete':False,'server_history_complete':False,'body_completeness_not_implied':True,
             'query_only':True,'committed_records_reverified':bool(verify),'ui_used':False,'llm_calls':0,
             'inventory_path':str(folder/'inventory.json'),'coverage_report':str(folder/'coverage.md')}
@@ -305,12 +344,21 @@ def _save_report(folder,data,result):
            '|---|---:|---:|---:|---:|---:|---:|---:|---:|']
     for p in result['platforms']:
         unscanned=not p['account_statuses'] or any(s['status']!='scanned_local_scope' for s in p['account_statuses'])
-        if unscanned:lines.append('| '+p['platform']+' | 未扫描 | 未扫描 | — | — | — | — | — | — |')
+        directory_scope=any('directory_enumeration_complete' in s for s in p['account_statuses'])
+        if directory_scope:
+            lines.append('| '+p['platform']+' | 目录候选 '+str(p['directory_group_candidates'])+' | 目录候选 '+str(p['directory_direct_candidates'])+' | 已固定窗口回读 '+str(p['desktop_captured_conversations'])+' | — | 全量未核实 | '+str(p['desktop_captured_messages'])+' | '+str(p['directory_only_candidates'])+' | '+str(p['unknown_conversations'])+' |')
+        elif unscanned:lines.append('| '+p['platform']+' | 未扫描 | 未扫描 | — | — | — | — | — | — |')
         else:lines.append('| '+' | '.join(str(p[k]) for k in ('platform','confirmed_groups','confirmed_direct','eligible_conversations','committed_conversations','expected_local_messages','committed_messages','directory_only_candidates','unknown_conversations'))+' |')
     lines+=['','## 逐会话清单','', '| 平台 | 类型 | 会话 | 本地七天消息 | 处理状态 | 缺口或错误 |','|---|---|---|---:|---|---|']
     for e in data['conversations']:
         r=_receipt(folder,e['key']) or {}
         state=r.get('status') or ('pending' if e['eligible'] else 'excluded_service' if e['conversation_type']=='service' else 'needs_review_or_source_data')
         gap=r.get('error') or '; '.join(e['coverage_gaps'])
+        if e.get('source_kind')=='desktop_directory_metadata' and state=='committed':
+            try:
+                from .desktop_backfill import verify_desktop_receipt
+                verify_desktop_receipt(folder.parent.parent,folder,data,e,r)
+            except (IMError,OSError,ValueError,KeyError,TypeError) as exc:
+                state='failed';gap=exc.code if isinstance(exc,IMError) else 'DESKTOP_CAPTURE_READBACK_FAILED'
         lines.append('| '+' | '.join(_safe(v) for v in (e['platform'],e['conversation_type'],e['conversation_name'],e['local_message_count'],state,gap))+' |')
     temp=folder/('coverage-'+uuid.uuid4().hex+'.tmp');write_new(temp,('\n'.join(lines)+'\n').encode('utf-8'));os.replace(temp,folder/'coverage.md')
