@@ -136,7 +136,7 @@ def writer(home: Path, lock_name: str = '.writer.lock'):
     check_home(home)
     if not (home / 'im-hub.json').is_file():
         raise IMError('LEGACY_HOME_READ_ONLY_USE_NEW_HOME_FOR_WRITES')
-    if lock_name not in ('.writer.lock', '.collection.lock', '.desktop.lock', '.run.lock', '.soak.lock'):
+    if lock_name not in ('.writer.lock', '.collection.lock', '.desktop.lock', '.run.lock', '.soak.lock', '.activity.lock'):
         raise IMError('INVALID_INTERNAL_LOCK')
     f = (home / lock_name).open('a+b')
     locked = False
@@ -174,7 +174,10 @@ def binding_spec(spec: dict) -> dict:
 
 def stream_key(spec: dict) -> str:
     bound = binding_spec(spec)
-    return 'im-' + digest({k: bound[k] for k in ('platform', 'account_namespace', 'conversation_id', 'adapter', 'source_epoch', 'data_class')})[:32]
+    identity = {k: bound[k] for k in ('platform', 'account_namespace', 'conversation_id', 'adapter', 'source_epoch', 'data_class')}
+    if bound['adapter'] == 'activity-json':
+        identity['conversation_type'] = bound['conversation_type']
+    return 'im-' + digest(identity)[:32]
 
 def db_path(home: Path, stream_id: str) -> Path:
     if not re.fullmatch(r'im-[0-9a-f]{32}', stream_id):

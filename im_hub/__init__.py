@@ -1,2 +1,2 @@
 """CLI-only local IM evidence hub."""
-__version__ = "1.0.0rc4"
+__version__ = "1.1.0a1"

@@ -19,6 +19,9 @@ def capabilities() -> dict:
         'configured_file_collection': True, 'automatic_client_collection': True,
         'automatic_collection_scope': 'explicit_calibrated_sources_and_authorized_desktop_deadline',
         'configured_database_collection': True,
+        'active_account_discovery': {'implemented_platforms': ['wechat','kim'], 'pending_platforms': ['qq','wecom'],
+                                     'conversation_types': ['group','direct'], 'commands': ['discover-week','backfill-week','week-status'],
+                                     'fixed_window': True, 'gui_used': False, 'full_four_platform_coverage': False},
         'live_database_readers': ['kim-sqlite', 'wechat-live'], 'plaintext_cache_readers': ['wechat-sqlite'],
         'recoverable_acquisition_batches': True, 'collection_checkpoint_status': True,
         'platforms': {

@@ -1,0 +1,56 @@
+{
+  "schema": "im-hub-active-accounts/1",
+  "accounts": {
+    "wechat-account": {
+      "enabled": false,
+      "platform": "wechat",
+      "transport": "wechat-account",
+      "account_namespace": "reviewed-local-account",
+      "source_epoch": "reviewed-native-generation",
+      "data_class": "real",
+      "include_types": ["group", "direct"],
+      "account_directory": "C:/Private/WeChat/account/db_storage",
+      "existing_key_file": "C:/Private/existing-key-cache.json",
+      "key_policy": "existing-only",
+      "timeout_seconds": 60,
+      "max_messages_per_conversation": 20000,
+      "files": [
+        {"id": "session", "role": "session", "path": "C:/Private/WeChat/account/db_storage/session/session.db", "key_id": "session/session.db"},
+        {"id": "contact", "role": "contact", "path": "C:/Private/WeChat/account/db_storage/contact/contact.db", "key_id": "contact/contact.db"},
+        {"id": "message-0", "role": "messages", "path": "C:/Private/WeChat/account/db_storage/message/message_0.db", "key_id": "message/message_0.db"}
+      ]
+    },
+    "kim-account": {
+      "enabled": false,
+      "platform": "kim",
+      "transport": "kim-account",
+      "account_namespace": "reviewed-local-account",
+      "source_epoch": "reviewed-native-generation",
+      "data_class": "real",
+      "include_types": ["group", "direct"],
+      "account_directory": "C:/Private/KIM/reviewed-account",
+      "database": "C:/Private/KIM/reviewed-account/user.db",
+      "self_user_id": 1,
+      "timeout_seconds": 60,
+      "max_messages_per_conversation": 20000
+    },
+    "tim-account": {
+      "enabled": false,
+      "platform": "qq",
+      "transport": "not-scanned",
+      "account_namespace": "reviewed-local-account",
+      "source_epoch": "reviewed-native-generation",
+      "data_class": "real",
+      "include_types": ["group", "direct"]
+    },
+    "wecom-account": {
+      "enabled": false,
+      "platform": "wecom",
+      "transport": "not-scanned",
+      "account_namespace": "reviewed-local-account",
+      "source_epoch": "reviewed-native-generation",
+      "data_class": "real",
+      "include_types": ["group", "direct"]
+    }
+  }
+}

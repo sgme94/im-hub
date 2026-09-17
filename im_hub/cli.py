@@ -30,6 +30,7 @@ def filters(p, query=False):
     if query:
         p.add_argument('keyword', nargs='?', default='')
         p.add_argument('--conversation')
+        p.add_argument('--conversation-type', choices=('group','direct'))
         p.add_argument('--account')
         p.add_argument('--since', help='ISO time with explicit timezone, inclusive')
         p.add_argument('--until', help='ISO time with explicit timezone, exclusive')
@@ -42,7 +43,7 @@ def query_args(a):
             'conversation': a.conversation, 'account': a.account,
             'since': epoch(a.since), 'until': epoch(a.until), 'limit': a.limit,
             'cursor': a.cursor, 'include_synthetic': a.include_synthetic,
-            'full': a.full, 'max_age': a.max_age_seconds}
+            'full': a.full, 'max_age': a.max_age_seconds, 'conversation_type': a.conversation_type}
 
 def build_parser():
     p = Parser(prog='im-hub', description='Local IM evidence hub. Query never refreshes clients. JSON stdout; no server or scheduler.')
@@ -52,6 +53,19 @@ def build_parser():
     commands.add_parser('init', help='Create a dedicated private ChatLab/provenance home')
     commands.add_parser('doctor', help='Check pinned local dependency; never install or log in')
     commands.add_parser('capabilities', help='Report implemented and pending capabilities; no client access')
+    discovery = commands.add_parser('discover-week', help='Discover active groups/direct chats in explicit native accounts; no GUI, bodies or background work')
+    discovery.add_argument('--config', required=True, type=Path)
+    discovery.add_argument('--since'); discovery.add_argument('--until')
+    discovery.add_argument('--days', type=int, default=7)
+    fill = commands.add_parser('backfill-week', help='Resume fixed-window group/direct backfill from a saved inventory')
+    fill.add_argument('--inventory', required=True)
+    fill.add_argument('--max-conversations', type=int, default=200)
+    fill.add_argument('--replay', action='store_true')
+    ws = commands.add_parser('week-status', help='Read inventory, per-conversation coverage and explicit unscanned-channel gaps')
+    ws.add_argument('--inventory', required=True)
+    ws.add_argument('--details', action='store_true')
+    ws.add_argument('--verify', action='store_true')
+    ws.add_argument('--limit', type=int, default=100); ws.add_argument('--offset', type=int, default=0)
     c = commands.add_parser('collect', help='Explicit configured file or read-only database acquisition; no client UI automation')
     c.add_argument('--config', required=True, type=Path)
     c.add_argument('--source', required=True)
@@ -115,6 +129,7 @@ def build_parser():
     i.add_argument('--platform', required=True, choices=('wechat', 'kim', 'wecom', 'qq'))
     i.add_argument('--account', required=True, help='Reviewed local account namespace, not a password or token')
     i.add_argument('--conversation', required=True)
+    i.add_argument('--conversation-type', choices=('group','direct'), help='Required for activity-json; older adapters keep legacy group semantics')
     i.add_argument('--name', required=True)
     i.add_argument('--source-epoch', required=True, help='Reviewed account/database generation; change after rebuild or account change')
     i.add_argument('--observed-at', required=True, help='Original source observation time, not this import time')
@@ -144,6 +159,15 @@ def main(argv=None):
             data = initialize(home)
         elif a.command == 'capabilities':
             data = capabilities()
+        elif a.command == 'discover-week':
+            from .activity import discover_week
+            data = discover_week(home,a.config,a.since,a.until,a.days)
+        elif a.command == 'backfill-week':
+            from .activity import backfill_week
+            data = backfill_week(home,a.inventory,a.max_conversations,a.replay)
+        elif a.command == 'week-status':
+            from .activity import week_status
+            data = week_status(home,a.inventory,a.details,a.limit,a.offset,a.verify)
         elif a.command == 'collect':
             data = collect(home, a.config, a.source, a.dry_run, until=a.until, reconcile=a.reconcile,
                            allow_ui=a.allow_ui, after_sequence=a.after_sequence)
@@ -210,7 +234,7 @@ def main(argv=None):
                 raise IMError('MESSAGE_NOT_FOUND')
         elif a.command == 'ingest':
             spec = spec_for(a.platform, a.account, a.conversation, a.name, a.adapter,
-                            a.source_epoch, a.data_class, a.binding, a.source_account)
+                            a.source_epoch, a.data_class, a.binding, a.source_account, a.conversation_type)
             data = ingest(home, a.input, spec, a.observed_at, epoch(a.since), epoch(a.until),
                           a.expected_sha256, a.allow_new_snapshot, a.dry_run)
         elif a.command == 'validate-candidates':
@@ -218,6 +242,8 @@ def main(argv=None):
         else:
             raise IMError('UNKNOWN_COMMAND')
         print(json.dumps({'ok': True, 'command': a.command, 'data': data}, ensure_ascii=False, allow_nan=False))
+        if a.command == 'backfill-week' and data['failed_this_call']:
+            return 4
         if a.command == 'soak':
             return 0 if data['status']=='segment_complete' and not data['paused_sources'] and data.get('last_cycle_all_succeeded') else 4
         return 4 if a.command == 'run' and not data['success'] else 0

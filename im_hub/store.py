@@ -76,7 +76,8 @@ def payload_for(spec: dict, rows: list[dict], observed_at: str) -> dict:
                        'description': 'Local evidence projection; source identities and coverage are in the im-hub sidecar.'},
             'meta': {'name': spec['conversation_name'],
                      'platform': 'weixin' if spec['platform'] == 'wechat' else spec['platform'],
-                     'type': 'group', 'groupId': stream_key(spec)},
+                     **({'type': 'private'} if spec.get('conversation_type') == 'direct'
+                        else {'type': 'group', 'groupId': stream_key(spec)})},
             'members': list(members.values()), 'messages': messages}
 
 def validate_readback(home: Path, sid: str, rows: list[dict]) -> dict:

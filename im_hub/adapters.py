@@ -7,7 +7,7 @@ import importlib
 from pathlib import Path
 from .common import IMError, MAX_RECORDS, canonical, digest, iso_epoch, label, load_json, stamp, stream_key
 
-ADAPTERS = ('normalized-v2', 'database-json', 'tim-txt', 'tim-sequence-json', 'wecom-json', 'wecom-native', 'qce-json')
+ADAPTERS = ('normalized-v2', 'database-json', 'tim-txt', 'tim-sequence-json', 'wecom-json', 'wecom-native', 'qce-json', 'activity-json')
 
 def existing_module(folder: str, module: str):
     reviewed = {
@@ -20,13 +20,20 @@ def existing_module(folder: str, module: str):
     return importlib.import_module('.codecs.' + codec, __package__)
 
 def spec_for(platform: str, account: str, conversation: str, name: str, adapter: str,
-             epoch: str, data_class: str, binding=None, source_account=None) -> dict:
+             epoch: str, data_class: str, binding=None, source_account=None, conversation_type=None) -> dict:
     if platform not in ('wechat', 'kim', 'wecom', 'qq') or adapter not in ADAPTERS:
         raise IMError('UNSUPPORTED_ADAPTER')
-    allowed = {'normalized-v2': ('wechat', 'kim'), 'database-json': ('wechat', 'kim'), 'tim-txt': ('qq',), 'tim-sequence-json': ('qq',),
+    allowed = {'activity-json': ('wechat', 'kim'), 'normalized-v2': ('wechat', 'kim'), 'database-json': ('wechat', 'kim'), 'tim-txt': ('qq',), 'tim-sequence-json': ('qq',),
                'wecom-json': ('wecom',), 'wecom-native': ('wecom',), 'qce-json': ('qq',)}
     if platform not in allowed[adapter] or data_class not in ('real', 'synthetic'):
         raise IMError('ADAPTER_PLATFORM_MISMATCH')
+    typed = {}
+    if adapter == 'activity-json':
+        if conversation_type not in ('group', 'direct'):
+            raise IMError('ACTIVITY_CONVERSATION_TYPE_REQUIRED')
+        typed['conversation_type'] = conversation_type
+    elif conversation_type is not None:
+        raise IMError('CONVERSATION_TYPE_REQUIRES_ACTIVITY_ADAPTER')
     if adapter.startswith('wecom'):
         label(binding, 'EXPLICIT_WECOM_BINDING_REQUIRED')
     if adapter == 'qce-json':
@@ -36,7 +43,7 @@ def spec_for(platform: str, account: str, conversation: str, name: str, adapter:
             'adapter': adapter, 'source_epoch': label(epoch), 'data_class': data_class,
             'binding': binding, 'source_account': source_account,
             'collection_mode': 'explicit_database_snapshot' if adapter == 'database-json' else 'existing_file_or_native_payload',
-            'adapter_version': '1', 'full_history_verified': False}
+            'adapter_version': '1', 'full_history_verified': False, **typed}
 
 def _record(spec, identity, quality, ts, text, kind, sender, sender_name, sender_verified,
             locator, native_id=None, flags=None, reply=None, extras=None, event_ms=None):
@@ -73,6 +80,9 @@ def _record(spec, identity, quality, ts, text, kind, sender, sender_name, sender
 
 def normalize(blob: bytes, spec: dict, since=None, until=None) -> tuple[list[dict], dict]:
     adapter, platform = spec['adapter'], spec['platform']
+    if adapter == 'activity-json':
+        from .activity import normalize_activity
+        return normalize_activity(blob, spec, since, until)
     if adapter == 'tim-sequence-json':
         from .tim_sequence import normalize_sequence
         return normalize_sequence(blob, spec, since, until)

@@ -41,6 +41,7 @@ def source_status(home: Path, platform=None, stream=None, include_synthetic=Fals
                           'imported_at': b['imported_at'], **json.loads(b['manifest_json'])['coverage']} for b in committed]
             items.append({'stream_id': sid, **{k: spec[k] for k in
                 ('platform', 'account_namespace', 'conversation_id', 'conversation_name', 'adapter', 'source_epoch', 'data_class', 'collection_mode')},
+                'conversation_type': spec.get('conversation_type', 'group'),
                 'stored_records': count, 'source_observed_at': latest_observation,
                 'cache_observed_at': cache_observation,
                 'freshness': freshness, 'freshness_age_seconds': round(age, 3) if age is not None else None,
@@ -67,7 +68,7 @@ def _decode_cursor(value):
 
 def query_messages(home: Path, keyword='', platform=None, stream=None, conversation=None,
                    account=None, since=None, until=None, limit=50, cursor=None,
-                   include_synthetic=False, full=False, max_age=None, message_key=None) -> dict:
+                   include_synthetic=False, full=False, max_age=None, message_key=None, conversation_type=None) -> dict:
     check_home(home)
     if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= MAX_LIMIT:
         raise IMError('LIMIT_MUST_BE_1_TO_200')
@@ -77,6 +78,10 @@ def query_messages(home: Path, keyword='', platform=None, stream=None, conversat
         raise IMError('INVALID_WINDOW')
     scope = {'keyword': keyword, 'platform': platform, 'stream': stream, 'conversation': conversation,
              'account': account, 'since': since, 'until': until, 'include_synthetic': include_synthetic, 'message_key': message_key}
+    if conversation_type is not None:
+        if conversation_type not in ('group', 'direct'):
+            raise IMError('INVALID_CONVERSATION_TYPE_FILTER')
+        scope['conversation_type'] = conversation_type
     scope_hash = digest(scope)
     rev = revision(home)
     after_ms, after_key = -1, ''
@@ -89,7 +94,8 @@ def query_messages(home: Path, keyword='', platform=None, stream=None, conversat
         after_ms, after_key = state['after_ms'], state['after_key']
     status = source_status(home, platform, stream, include_synthetic, max_age)
     sources = [s for s in status['items'] if (not conversation or s['conversation_id'] == conversation)
-               and (not account or s['account_namespace'] == account)]
+               and (not account or s['account_namespace'] == account)
+               and (not conversation_type or s['conversation_type'] == conversation_type)]
     collected = []
     idx = readonly(home / 'index.sqlite3')
     try:

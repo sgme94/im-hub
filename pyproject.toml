@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "im-hub"
-version = "1.0.0rc4"
+version = "1.1.0a1"
 description = "CLI-only local IM collection, query and evidence hub; no mandatory LLM."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
+activity = ["cryptography>=41", "zstandard>=0.25"]
 visual = ["pillow>=10", "opencv-python-headless>=4.10", "pywinauto>=0.6.9; sys_platform == 'win32'"]
 crypto = ["cryptography>=41"]
 windows = ["pywin32==312; sys_platform == 'win32'", "uiautomation==2.0.29; sys_platform == 'win32'"]
