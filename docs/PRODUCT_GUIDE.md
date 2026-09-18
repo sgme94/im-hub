@@ -1,10 +1,10 @@
 # im-hub 产品使用与交付手册
 
-版本：1.0.0rc4。形态：Windows x64 命令行便携包，同时提供 Python wheel 和源码。
+版本：1.1.0。形态：Windows x64 命令行便携包，同时提供 Python wheel 和源码。稳定发布边界：TIM/QQ、KIM/OA、微信；企业微信保留实验能力但不计入本版稳定验收。
 
 ## 1. 本次交付的边界
 
-RC4 包含持续运行中发现的正常剪贴板 API 不可用与 CLI 错误格式修复；不删除旧失败运行记录。见[恢复说明](CLIPBOARD_RECOVERY.md)。
+1.1.0 在 RC4 确定性核心上收敛三平台稳定链路，并加入账号级最近七天发现、固定窗口回补、逐会话覆盖与 MyMind Collect 接线。企业微信仍按实验候选处理，不因本版本发布自动启用。
 
 可运行的产品闭环是：配置 → 本地数据库／已完成导出／原生载荷 → 规范化 → 单写者导入 → 只读查询 → 证据汇编 → 校验 → 备份恢复。核心不调用 LLM，没有 Web、Electron 或桌面前端，没有消息发送入口。
 
@@ -14,7 +14,7 @@ RC4 包含持续运行中发现的正常剪贴板 API 不可用与 CLI 错误格
 
 ## 2. 解压即用
 
-将 `im-hub-1.0.0rc4-windows-x64.zip` 整体解压，不要只拿走 EXE。目录中的 `_internal` 和 `backend` 是运行依赖；不需要预先安装 Python、Node、npm 或前端，也不会在运行时下载依赖。
+将 `im-hub-1.1.0-windows-x64.zip` 整体解压，不要只拿走 EXE。目录中的 `_internal` 和 `backend` 是运行依赖；不需要预先安装 Python、Node、npm 或前端，也不会在运行时下载依赖。
 
 ```powershell
 Set-Location 'C:\Tools\im-hub'

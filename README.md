@@ -6,6 +6,8 @@
 
 ## 当前状态
 
+**`1.1.0` 三平台稳定版**：正式稳定边界为 TIM/QQ、KIM/OA、微信。TIM 使用官方 TXT 完整导出与严格前缀去重，KIM 使用精确账号/会话原生 SQLite，只读微信使用当前加密库/WAL 与现有显式密钥配置；三者均进入 MyMind Collect 的受控证据入口。企业微信代码继续保留为实验候选，但不属于 `1.1.0` 稳定发布边界、不计入三平台验收，也不会因本版本安装而自动启用。
+
 **真实客户端核验与逐会话接线增量**：已增加 `probe-desktop-directory` 和 `collect-desktop-week`，后者只在身份已核实、来源已绑定时获取并按固定窗口回补；断线未知结果不会盲目再采集。恢复复核后的最终版本通过 405 项全量测试、13 项真实 ChatLab 后端合成验证；修复了未知采集结果续接位置及嵌套回补的原配置一致性检查。实际 TIM 可见目录含“群助手”，但缺少严格目录驱动要求的原生字段/计数；企微未暴露会话元数据控件。两平台普通/折叠全账号实机回补仍未完成，不启用生产采集。见[实机核验与操作说明](docs/TIM_WECOM_REAL_PROVIDER.md)及[恢复复核回执](docs/ACCEPTANCE_TIM_WECOM_RECOVERY.json)。原[400 项测试回执](docs/ACCEPTANCE_TIM_WECOM_REAL_PROVIDER.json)保留为复核前证据，不代表当前最终源码。
 
 **未发布增量候选**：新增审核式 UIA 普通/折叠目录遍历、`desktop-backfill-plan` 和 `backfill-desktop-week`。后者仅复用明确指定的已完成群聊捕获批次，支持固定窗口、真实回读和重放；不触碰客户端。TIM/企微的实际目录控件尚未校准，单聊适配和自动发现到新采集的闭环尚未通过，真实配置仍保持 `not-scanned`。详见[桌面目录候选与验收边界](docs/DESKTOP_DIRECTORY_CANDIDATE.md)。
@@ -36,7 +38,7 @@
 
 ## 安装
 
-新增的 `1.1.0a1` 活跃会话命令使用源码安装 `python -m pip install -e ".[activity]"` 或对应 wheel。此前的 RC4 便携 EXE 不包含这些命令；下面的 RC4 说明只适用于旧功能，不表示 alpha 便携发行已发布。
+`1.1.0` 同时提供源码/wheel 与新的 Windows x64 便携包。账号级活跃会话命令可用 `python -m pip install -e ".[activity]"` 或对应 wheel；企业微信仍为实验候选，不属于本稳定版验收边界。
 
 Windows 便携包：整体解压发行页 `im-hub-1.0.0rc4-windows-x64.zip`，保留 `_internal` 和 `backend`，直接运行下列命令。此包自带 Python 运行时、Node 与固定 ChatLab 后端；不需要另装前端或运行 npm。
 
